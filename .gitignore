@@ -1,0 +1,26 @@
+# 環境変数ファイル（APIキーが含まれるため）
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Streamlit
+.streamlit/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
