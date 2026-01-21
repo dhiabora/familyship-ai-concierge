@@ -6,7 +6,7 @@ import os
 import csv
 import io
 from typing import List, Dict, Optional
-from config import get_google_sheets_id, get_google_sheets_credentials_path
+from config import get_google_sheets_id, get_google_sheets_credentials
 
 
 def load_from_google_sheets() -> Optional[str]:
@@ -21,13 +21,9 @@ def load_from_google_sheets() -> Optional[str]:
         from google.oauth2.service_account import Credentials
         
         sheets_id = get_google_sheets_id()
-        credentials_path = get_google_sheets_credentials_path()
+        credentials_dict = get_google_sheets_credentials()
         
-        if not sheets_id or not credentials_path:
-            return None
-        
-        # 認証情報の読み込み
-        if not os.path.exists(credentials_path):
+        if not sheets_id or not credentials_dict:
             return None
         
         scopes = [
@@ -35,7 +31,8 @@ def load_from_google_sheets() -> Optional[str]:
             'https://www.googleapis.com/auth/drive'
         ]
         
-        creds = Credentials.from_service_account_file(credentials_path, scopes=scopes)
+        # 認証情報の辞書からCredentialsオブジェクトを作成
+        creds = Credentials.from_service_account_info(credentials_dict, scopes=scopes)
         client = gspread.authorize(creds)
         
         # スプレッドシートを開く

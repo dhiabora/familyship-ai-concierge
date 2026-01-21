@@ -1,6 +1,13 @@
 # 環境変数ファイル（APIキーが含まれるため）
 .env
 
+# Googleサービスアカウント認証情報（機密情報）
+*.json
+!package.json
+!package-lock.json
+secrets/
+credentials/
+
 # Python
 __pycache__/
 *.py[cod]

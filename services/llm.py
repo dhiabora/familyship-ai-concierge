@@ -1,10 +1,8 @@
-"""
-Gemini LLM呼び出しサービス
-"""
+"""Gemini LLM呼び出しサービス"""
 import google.generativeai as genai
 from typing import Optional, List
 from config import get_gemini_api_key
-from prompts import SYSTEM_PROMPT
+from prompts import build_system_prompt
 
 
 def initialize_gemini() -> bool:
@@ -35,7 +33,33 @@ def list_available_models() -> List[str]:
         return []
 
 
-def generate_response(user_input: str, course_data: Optional[str] = None) -> str:
+def _build_prompt(user_input: str, course_data: Optional[str], guidelines: Optional[str]) -> str:
+    """
+    ガイドラインと講座データを統合したプロンプトを組み立てる。
+    """
+    system_prompt = build_system_prompt(guidelines or "")
+    if course_data:
+        return f"""{system_prompt}
+
+# 講座データベース（CSV形式）
+{course_data}
+
+上記の講座データベースを参考に、以下のユーザーの悩みに対して適切な講座を2〜3件提案してください。
+
+ユーザーの悩み：
+{user_input}
+"""
+
+    return f"""{system_prompt}
+
+ユーザーの悩み：
+{user_input}
+
+上記の悩みに対して、優しく共感しながら応答してください。名前を呼ぶ必要はありません。温かくサポートする姿勢で回答してください。
+"""
+
+
+def generate_response(user_input: str, course_data: Optional[str] = None, guidelines: Optional[str] = None) -> str:
     """
     ユーザーの入力に対してGeminiで回答を生成
     
@@ -100,28 +124,7 @@ def generate_response(user_input: str, course_data: Optional[str] = None) -> str
             error_msg += f"エラー詳細: {str(last_error)}"
         raise ValueError(error_msg)
     
-    # プロンプトの構築
-    if course_data:
-        # 後で実装: 講座データを含める場合
-        prompt = f"""{SYSTEM_PROMPT}
-
-# 講座データベース（CSV形式）
-{course_data}
-
-上記の講座データベースを参考に、以下のユーザーの悩みに対して適切な講座を2〜3件提案してください。
-
-ユーザーの悩み：
-{user_input}
-"""
-    else:
-        # データがない場合でも、一般的なアドバイスを提供
-        prompt = f"""{SYSTEM_PROMPT}
-
-ユーザーの悩み：
-{user_input}
-
-上記の悩みに対して、優しく共感しながら応答してください。名前を呼ぶ必要はありません。温かくサポートする姿勢で回答してください。
-"""
+    prompt = _build_prompt(user_input, course_data, guidelines)
     
     # 回答生成（エラー時は別のモデルを試す）
     try:
