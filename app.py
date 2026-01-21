@@ -20,13 +20,18 @@ LIGHT_GRAY = "#f7f7f7"
 def render_logo():
     """
     アプリのロゴを表示（assets/concierge_logo.png に配置された場合のみ）。
-    画像がない場合は何もしない。
+    ファイル名にコロンが含まれる場合も補足。
     """
-    logo_path = os.path.join(os.path.dirname(__file__), "assets", "concierge_logo.png")
-    if os.path.exists(logo_path):
-        st.image(logo_path, width=140)
-        st.session_state.logo_loaded = True
-        return True
+    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+    candidates = [
+        os.path.join(assets_dir, "concierge_logo.png"),
+        os.path.join(assets_dir, "assets:concierge_logo.png"),
+    ]
+    for logo_path in candidates:
+        if os.path.exists(logo_path):
+            st.image(logo_path, width=140)
+            st.session_state.logo_loaded = True
+            return True
     st.session_state.logo_loaded = False
     return False
 
@@ -73,23 +78,9 @@ with st.sidebar:
     st.markdown("""
     1. 育児の悩みや質問を入力
     2. 送信ボタンをクリック
-    3. AIコンシェルジュが講座やナレッジをもとに提案します
+    3. AIコンシェルジュが講座データとガイドラインをもとに提案します
     """)
     st.caption("Shift+Enterで改行できます")
-
-    st.markdown("### 📚 コンシェルジュのナレッジ")
-    st.caption("デフォルトは data/guidelines.md を使用。ここで差し替えもできます。")
-    uploaded_file = st.file_uploader("ガイドラインを差し替え (md/txt)", type=["md", "txt"])
-    manual_guideline = st.text_area("追記したいナレッジ (任意)", height=80)
-
-    if st.button("ナレッジを適用", use_container_width=True):
-        uploaded_text = None
-        if uploaded_file:
-            uploaded_text = uploaded_file.read().decode("utf-8")
-        combined_text_parts = [part for part in [uploaded_text, manual_guideline] if part and part.strip()]
-        combined_text = "\n\n".join(combined_text_parts) if combined_text_parts else None
-        st.session_state.guidelines = resolve_guidelines(combined_text)
-        st.success("ナレッジを更新しました")
 
     st.markdown("### 🔗 データソース")
     with st.expander("講座データ読み込み状況", expanded=False):
@@ -106,8 +97,6 @@ with st.sidebar:
         else:
             st.write("📄 **ローカルCSV** (data/courses.csv)")
             st.caption("Google Sheets未設定のため、ローカルファイルを使用")
-    st.markdown("### 🖼️ ロゴ画像")
-    st.caption("`assets/concierge_logo.png` を配置するとヘッダーに表示されます。")
 
 
 # メインコンテンツ（ヘッダー）
@@ -123,20 +112,22 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# カスタムCSSで全体のスタイルを微調整（ランディングページカラーに合わせる）
+# カスタムCSSで全体のスタイルを微調整（柔らかいピンク×ミントベース）
 st.markdown(
     f"""
 <style>
 :root {{
-    --pink: {PINK};
-    --mint: {MINT};
+    --pink: #f9e8ef;
+    --mint: #e7f4f3;
     --navy: {NAVY};
     --white: {WHITE};
-    --light-gray: {LIGHT_GRAY};
+    --light-gray: #fdfbfc;
 }}
 
 .main {{
-    background: linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
+    background: radial-gradient(circle at 20% 20%, rgba(249,232,239,0.9), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(231,244,243,0.9), transparent 30%),
+                linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
 }}
 section.main > div {{
     background: transparent;
@@ -148,10 +139,11 @@ section.main > div {{
     background: rgba(255,255,255,0.92);
 }}
 .block-container {{
-    background: rgba(255,255,255,0.92);
-    border-radius: 14px;
-    padding: 2rem 2.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    background: rgba(255,255,255,0.96);
+    border-radius: 18px;
+    padding: 2.25rem 2.75rem;
+    box-shadow: 0 12px 38px rgba(0,0,0,0.08);
+    max-width: 1100px;
 }}
 .stMarkdown a {{
     color: #0f7b8e;
@@ -164,28 +156,28 @@ section.main > div {{
 .stChatMessage {{
     border: 1px solid rgba(45,42,50,0.08);
     background: var(--white);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
 }}
 .stChatMessage[data-testid="stChatMessage-user"] {{
-    background: linear-gradient(135deg, rgba(246,201,213,0.35), rgba(199,231,229,0.35));
-    border-color: rgba(246,201,213,0.6);
+    background: linear-gradient(135deg, rgba(249,232,239,0.55), rgba(231,244,243,0.45));
+    border-color: rgba(249,232,239,0.8);
 }}
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
-    border-color: rgba(199,231,229,0.8);
+    border-color: rgba(231,244,243,0.9);
 }}
 .stButton>button {{
-    background: linear-gradient(120deg, var(--pink), var(--mint));
+    background: linear-gradient(120deg, #f8d9e4, #d9f0ee);
     color: var(--navy);
     font-weight: 700;
-    border: none;
-    border-radius: 10px;
-    padding: 0.6rem 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 1px solid rgba(13, 30, 37, 0.05);
+    border-radius: 12px;
+    padding: 0.65rem 1.05rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }}
 .stButton>button:hover {{
-    background: linear-gradient(120deg, var(--mint), var(--pink));
+    background: linear-gradient(120deg, #d9f0ee, #f8d9e4);
 }}
 .stTextArea > div > div > textarea, textarea {{
     color: #1f1f1f !important;
