@@ -76,36 +76,26 @@ if not api_key:
 with st.sidebar:
     st.markdown("### 💡 使い方")
     st.markdown("""
-    1. 育児の悩みや質問を入力
-    2. 送信ボタンをクリック
-    3. AIコンシェルジュが講座データとガイドラインをもとに提案します
+    - ファミリーシップのコンテンツ・講座・イベントの案内役です。
+    - FANTSアプリの操作や、どの講座を見ればよいかも案内します。
     """)
     st.caption("Shift+Enterで改行できます")
 
-    st.markdown("### 🔗 データソース")
-    with st.expander("講座データ読み込み状況", expanded=False):
-        from config import get_google_sheets_id, get_google_sheets_credentials
-        sheets_id = get_google_sheets_id()
-        creds = get_google_sheets_credentials()
-        
-        if sheets_id and creds:
-            st.write("✅ **Google Sheets** に接続中")
-            st.caption(f"シートID: {sheets_id[:20]}...")
-        elif sheets_id:
-            st.write("⚠️ **Google Sheets ID** は設定済み")
-            st.caption("認証情報が設定されていません")
-        else:
-            st.write("📄 **ローカルCSV** (data/courses.csv)")
-            st.caption("Google Sheets未設定のため、ローカルファイルを使用")
+    st.markdown("### ✍️ 質問の例")
+    st.markdown("""
+    - 「○ヶ月の夜泣きに効く講座を教えて」
+    - 「FANTSアプリでライブの視聴URLはどこ？」
+    - 「離乳食の悩みでどのクラスに相談したらいい？」
+    """)
 
 
 # メインコンテンツ（ヘッダー）
-header_left, header_right = st.columns([1, 4])
+header_left, header_right = st.columns([1, 5])
 with header_left:
     render_logo()
 with header_right:
     st.title("💬 AIコンシェルジュ")
-    st.markdown("**ねんねママのファミリーシップ** - 育児の悩みに最適な講座を提案します")
+    st.markdown("**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。")
 
 # チャット履歴の表示
 for message in st.session_state.messages:
@@ -122,6 +112,11 @@ st.markdown(
     --navy: {NAVY};
     --white: {WHITE};
     --light-gray: #fdfbfc;
+}}
+
+html, body, .stApp {{
+    height: 100%;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
 }}
 
 .main {{
@@ -141,9 +136,10 @@ section.main > div {{
 .block-container {{
     background: rgba(255,255,255,0.96);
     border-radius: 18px;
-    padding: 2.25rem 2.75rem;
+    padding: 2rem 2.4rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
-    max-width: 1100px;
+    max-width: 1200px;
+    margin-top: 1.5rem;
 }}
 .stMarkdown a {{
     color: #0f7b8e;
@@ -159,6 +155,7 @@ section.main > div {{
     border-radius: 16px;
     padding: 14px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    overflow: visible;
 }}
 .stChatMessage[data-testid="stChatMessage-user"] {{
     background: linear-gradient(135deg, rgba(249,232,239,0.55), rgba(231,244,243,0.45));
@@ -182,6 +179,8 @@ section.main > div {{
 .stTextArea > div > div > textarea, textarea {{
     color: #1f1f1f !important;
     background: var(--white);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }}
 .stTextArea label, label {{
     color: var(--navy);
