@@ -227,8 +227,8 @@ section[data-testid="stMain"] > div:first-child > div:first-child {{
 }}
 /* タイトルを含む最初のブロックに余白を追加 */
 div[data-testid="stVerticalBlock"]:first-of-type {{
-    padding-top: 1rem !important;
-    margin-top: 0.5rem !important;
+    padding-top: 0.1rem !important;
+    margin-top: 0.1rem !important;
 }}
 /* stVerticalBlockのpadding-topとmargin-topを0.1remに */
 div[data-testid="stVerticalBlock"] {{
