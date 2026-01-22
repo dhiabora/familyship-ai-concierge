@@ -122,10 +122,10 @@ assistant_icon_path = get_custom_icon("assistant")
 if assistant_icon_path:
     st.markdown(
         f"""
-        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 0.5rem; margin-top: 0; padding-top: 0;">
+        <div style="display: flex; align-items: flex-start; gap: 12px; margin: 0; padding: 0;">
             <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
-                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin: 0; padding: 0; flex-shrink: 0; vertical-align: top;" />
-            <h1 style="margin: 0; padding: 0; font-size: 2.25rem; line-height: 32px;">ファミリーシップ案内人</h1>
+                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin: 0; padding: 0; flex-shrink: 0; vertical-align: top; display: block;" />
+            <h1 style="margin: 0; padding: 0; font-size: 2.25rem; line-height: 32px; display: block;">ファミリーシップ案内人</h1>
         </div>
         """,
         unsafe_allow_html=True
@@ -202,24 +202,31 @@ h1, div:has(> h1), div:has(> img[src*="assistant_icon"]) {{
     margin-top: 1rem !important;
     padding-top: 1rem !important;
 }}
-/* タイトル部分のアイコンとテキストの位置を統一 */
+/* タイトル部分のアイコンとテキストの位置を統一 - より強力なセレクタ */
+div:has(> img[src*="assistant_icon"]),
+div:has(> img[src*="assistant_icon"]) * {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    vertical-align: top !important;
+}}
 div:has(> img[src*="assistant_icon"]) {{
     display: flex !important;
     align-items: flex-start !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }}
 div:has(> img[src*="assistant_icon"]) img {{
     margin: 0 !important;
     padding: 0 !important;
     vertical-align: top !important;
     flex-shrink: 0;
+    display: block !important;
 }}
 div:has(> img[src*="assistant_icon"]) h1 {{
     margin: 0 !important;
     padding: 0 !important;
     line-height: 32px !important;
-    align-self: flex-start;
+    display: block !important;
 }}
 /* Streamlitのデフォルトヘッダーとの間隔を確保 */
 section[data-testid="stMain"] > div:first-child,
@@ -306,47 +313,35 @@ div:has(> div:contains("©")) div {{
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
     border-color: rgba(231,244,243,0.9);
 }}
-/* チャットメッセージのアイコンとテキストの位置を統一 */
+/* チャットメッセージのアイコンとテキストの位置を統一 - transformを使った微調整 */
 .stChatMessage > div {{
     display: flex !important;
     align-items: flex-start !important;
-    gap: 12px;
+    gap: 12px !important;
 }}
-/* アイコン部分の余白を削除 */
+/* アイコン部分を上に揃える */
+.stChatMessage img,
 .stChatMessage > div > div:first-child,
-.stChatMessage > div > div:first-child > img,
-.stChatMessage img[data-testid="stChatAvatar"] {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
+.stChatMessage > div > div:first-child img {{
+    margin: 0 !important;
+    padding: 0 !important;
     vertical-align: top !important;
-    align-self: flex-start !important;
+    transform: translateY(0) !important;
 }}
-/* テキスト部分の余白を削除 */
+/* テキスト部分をアイコンと同じ高さに調整 */
 .stChatMessage > div > div:last-child,
-.stChatMessage > div > div:last-child > div {{
+.stChatMessage .stMarkdown {{
     margin-top: 0 !important;
     padding-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-    flex: 1;
+    transform: translateY(0) !important;
 }}
-/* チャットメッセージ内のテキストの上の余白を削除 */
-.stChatMessage .stMarkdown,
+/* テキストの最初の要素の余白を削除 */
 .stChatMessage .stMarkdown > p:first-child,
 .stChatMessage .stMarkdown > div:first-child,
 .stChatMessage .stMarkdown > *:first-child {{
     margin-top: 0 !important;
     padding-top: 0 !important;
-}}
-/* カスタムアイコンのスタイル */
-.stChatMessage img {{
-    border-radius: 50%;
-    object-fit: cover;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    vertical-align: top !important;
+    line-height: 1.4 !important;
 }}
 .stButton>button {{
     background: linear-gradient(120deg, #f6c9d5, #c7e7e5) !important;
