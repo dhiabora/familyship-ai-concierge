@@ -293,8 +293,8 @@ div:has(> div:contains("©")) div {{
     object-fit: cover;
 }}
 .stButton>button {{
-    background: linear-gradient(120deg, #f8d9e4, #d9f0ee);
-    color: var(--navy);
+    background: linear-gradient(120deg, #f6c9d5, #c7e7e5) !important;
+    color: var(--navy) !important;
     font-weight: 700;
     border: 1px solid rgba(13, 30, 37, 0.05);
     border-radius: 12px;
@@ -302,7 +302,7 @@ div:has(> div:contains("©")) div {{
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }}
 .stButton>button:hover {{
-    background: linear-gradient(120deg, #d9f0ee, #f8d9e4);
+    background: linear-gradient(120deg, #f8aacb, #b8e0dd) !important;
 }}
 .stTextArea > div > div > textarea, textarea {{
     color: #1f1f1f !important;
@@ -367,6 +367,11 @@ div:has(> div:contains("©")) div {{
         padding-top: 0 !important;
         display: none !important;
     }}
+    /* 入力フォームの直下のすべての要素を非表示 */
+    form[data-testid="stForm"]::after {{
+        display: none !important;
+        content: none !important;
+    }}
     /* チャット履歴エリアに下部の余白を追加（入力フォームの高さ分） */
     div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
         padding-bottom: 180px !important;
@@ -379,7 +384,8 @@ div:has(> div:contains("©")) div {{
     }}
     /* 入力フォームの下に表示される可能性のある要素を非表示 */
     section[data-testid="stMain"] > div:last-child,
-    section[data-testid="stMain"] > div:last-child > div:last-child {{
+    section[data-testid="stMain"] > div:last-child > div:last-child,
+    section[data-testid="stMain"] > div:last-child > div:last-child > div {{
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
     }}
@@ -388,11 +394,40 @@ div:has(> div:contains("©")) div {{
         padding-bottom: 0 !important;
         margin-bottom: 0 !important;
     }}
+    /* 入力フォームの親要素の余白も削除 */
+    form[data-testid="stForm"] {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0.5rem !important;
+    }}
+    /* 入力フォーム内の最後の要素の余白を削除 */
+    form[data-testid="stForm"] > div:last-child {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }}
+    /* 画面最下部の余白を完全に削除 */
+    section[data-testid="stMain"],
+    section[data-testid="stMain"] > div,
+    .element-container:last-child,
+    .stMarkdown:last-child {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }}
+    /* 入力フォームの下の白いスペースを削除 */
+    div[data-testid="stVerticalBlock"]:has(form[data-testid="stForm"]) ~ * {{
+        display: none !important;
+    }}
     h1 {{
         font-size: 1.75rem !important;
     }}
+    /* モバイルでもサイドバーを表示可能にする */
     .stSidebar {{
-        display: none;
+        display: block !important;
+        z-index: 999 !important;
+    }}
+    /* モバイルでサイドバーが開いた時のスタイル */
+    [data-testid="stSidebar"][aria-expanded="true"] {{
+        min-width: 85vw !important;
+        max-width: 85vw !important;
     }}
     /* ページ全体の下部余白を削除 */
     body, html {{
