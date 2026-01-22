@@ -117,22 +117,8 @@ with st.sidebar:
 
 
 # メインコンテンツ（ヘッダー）
-# タイトルにassistant_iconを使用
-assistant_icon_path = get_custom_icon("assistant")
-if assistant_icon_path:
-    st.markdown(
-        f"""
-        <div style="display: flex; align-items: flex-start; gap: 12px; margin: 0; padding: 0;">
-            <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
-                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin: 0; padding: 0; flex-shrink: 0; vertical-align: top; display: block;" />
-            <h1 style="margin: 0; padding: 0; font-size: 2.25rem; line-height: 32px; display: block;">ファミリーシップ案内人</h1>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-else:
-    st.title("💬 ファミリーシップ案内人")
-st.markdown("**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。")
+st.title("💬 ファミリーシップ案内人")
+st.markdown("<div style='margin-top: 0.75rem;'>**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。</div>", unsafe_allow_html=True)
 
 # ロゴをタイトルの下に表示
 render_logo()
@@ -164,8 +150,11 @@ st.markdown(
 
 html, body, .stApp {{
     height: 100vh;
+    width: 100%;
+    max-width: 100vw;
     background: linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
-    overflow: hidden;
+    overflow-x: hidden !important;
+    overflow-y: auto;
 }}
 
 .main {{
@@ -173,6 +162,9 @@ html, body, .stApp {{
                 radial-gradient(circle at 80% 0%, rgba(231,244,243,0.9), transparent 30%),
                 linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
     height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden !important;
     overflow-y: auto;
 }}
 section.main > div {{
@@ -190,43 +182,39 @@ section.main > div {{
     padding: 1rem 1.5rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
     max-width: 1200px;
+    width: 100%;
     margin-top: 1.5rem;
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
     height: calc(100vh - 2rem);
     max-height: calc(100vh - 2rem);
+    overflow-x: hidden !important;
+    box-sizing: border-box;
 }}
 /* タイトル部分のヘッダー被りを防止 */
 h1, div:has(> h1), div:has(> img[src*="assistant_icon"]) {{
     margin-top: 1rem !important;
     padding-top: 1rem !important;
+    margin-bottom: 0.75rem !important;
 }}
-/* タイトル部分のアイコンとテキストの位置を統一 - より強力なセレクタ */
-div:has(> img[src*="assistant_icon"]),
-div:has(> img[src*="assistant_icon"]) * {{
-    margin-top: 0 !important;
+/* タイトルの下の説明テキストの間隔を調整 */
+h1 + .stMarkdown,
+h1 ~ .stMarkdown:first-of-type {{
+    margin-top: 0.75rem !important;
     padding-top: 0 !important;
-    vertical-align: top !important;
 }}
-div:has(> img[src*="assistant_icon"]) {{
-    display: flex !important;
-    align-items: flex-start !important;
-    margin: 0 !important;
-    padding: 0 !important;
+/* 横スクロールを防ぐための包括的な設定 */
+* {{
+    box-sizing: border-box;
+    max-width: 100%;
 }}
-div:has(> img[src*="assistant_icon"]) img {{
-    margin: 0 !important;
-    padding: 0 !important;
-    vertical-align: top !important;
-    flex-shrink: 0;
-    display: block !important;
-}}
-div:has(> img[src*="assistant_icon"]) h1 {{
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 32px !important;
-    display: block !important;
+section[data-testid="stMain"],
+section[data-testid="stMain"] > div,
+.stApp > div {{
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
 }}
 /* Streamlitのデフォルトヘッダーとの間隔を確保 */
 section[data-testid="stMain"] > div:first-child,
@@ -318,6 +306,9 @@ div:has(> div:contains("©")) div {{
     display: flex !important;
     align-items: flex-start !important;
     gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
 }}
 /* アイコン部分を上に揃える */
 .stChatMessage img,
@@ -327,6 +318,7 @@ div:has(> div:contains("©")) div {{
     padding: 0 !important;
     vertical-align: top !important;
     transform: translateY(0) !important;
+    flex-shrink: 0 !important;
 }}
 /* テキスト部分をアイコンと同じ高さに調整 */
 .stChatMessage > div > div:last-child,
@@ -334,6 +326,11 @@ div:has(> div:contains("©")) div {{
     margin-top: 0 !important;
     padding-top: 0 !important;
     transform: translateY(0) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
 }}
 /* テキストの最初の要素の余白を削除 */
 .stChatMessage .stMarkdown > p:first-child,
@@ -342,18 +339,21 @@ div:has(> div:contains("©")) div {{
     margin-top: 0 !important;
     padding-top: 0 !important;
     line-height: 1.4 !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
 }}
 .stButton>button {{
-    background: linear-gradient(120deg, #f6c9d5, #c7e7e5) !important;
-    color: var(--navy) !important;
+    background: #f6c9d5 !important;
+    color: #2d2a32 !important;
     font-weight: 700;
-    border: 1px solid rgba(13, 30, 37, 0.05);
+    border: 1px solid rgba(246, 201, 213, 0.3);
     border-radius: 12px;
     padding: 0.65rem 1.05rem;
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }}
 .stButton>button:hover {{
-    background: linear-gradient(120deg, #f8aacb, #b8e0dd) !important;
+    background: #f8aacb !important;
+    color: #2d2a32 !important;
 }}
 .stTextArea > div > div > textarea, textarea {{
     color: #1f1f1f !important;
@@ -365,18 +365,37 @@ div:has(> div:contains("©")) div {{
 .stTextArea label, label {{
     color: var(--navy);
     font-weight: 600;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin-bottom: 0.25rem !important;
+}}
+/* 質問入力欄のラベルの上の余白を削減 */
+form[data-testid="stForm"] .stTextArea label,
+form[data-testid="stForm"] label {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin-bottom: 0.25rem !important;
 }}
 .stTextInput>div>div>input {{
     background: var(--white);
 }}
 /* レスポンシブ対応：モバイル表示時の調整 */
 @media screen and (max-width: 768px) {{
+    html, body, .stApp, .main {{
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }}
     .block-container {{
         padding: 0.75rem 1rem;
         margin-top: 0.5rem;
         margin-bottom: 0 !important;
         border-radius: 12px;
         padding-bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }}
     /* 入力フォームをモバイルで確実に前面に、画面最下部に固定 */
     form[data-testid="stForm"] {{
