@@ -323,14 +323,17 @@ div:has(> div:contains("©")) div {{
     .block-container {{
         padding: 0.75rem 1rem;
         margin-top: 0.5rem;
+        margin-bottom: 0 !important;
         border-radius: 12px;
+        padding-bottom: 0 !important;
     }}
-    /* 入力フォームをモバイルで確実に前面に */
+    /* 入力フォームをモバイルで確実に前面に、画面最下部に固定 */
     form[data-testid="stForm"] {{
         background: #ffffff !important;
-        padding: 0.75rem;
-        border-radius: 12px 12px 0 0;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+        padding: 0.75rem !important;
+        padding-bottom: 0.5rem !important;
+        border-radius: 12px 12px 0 0 !important;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.12) !important;
         z-index: 1000 !important;
         position: fixed !important;
         bottom: 0 !important;
@@ -339,6 +342,7 @@ div:has(> div:contains("©")) div {{
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
+        margin-bottom: 0 !important;
     }}
     /* モバイルで入力フォームの背景を完全に不透明に */
     form[data-testid="stForm"] > div,
@@ -348,19 +352,52 @@ div:has(> div:contains("©")) div {{
     form[data-testid="stForm"] .stTextArea > div > div > textarea {{
         background: #ffffff !important;
     }}
+    /* フッターの余白を完全に削除（モバイル） */
+    form[data-testid="stForm"] div:has(> div:contains("©")),
+    form[data-testid="stForm"] div:has(> div:contains("©")) div {{
+        margin: 0 !important;
+        padding: 0.15rem 0 !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }}
+    /* 入力フォームの下の余白を完全に削除 */
+    form[data-testid="stForm"] + *,
+    form[data-testid="stForm"] ~ * {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        display: none !important;
+    }}
     /* チャット履歴エリアに下部の余白を追加（入力フォームの高さ分） */
     div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
         padding-bottom: 180px !important;
+        margin-bottom: 0 !important;
     }}
     /* メインコンテンツの下部余白を追加 */
     .block-container {{
         padding-bottom: 180px !important;
+        margin-bottom: 0 !important;
+    }}
+    /* 入力フォームの下に表示される可能性のある要素を非表示 */
+    section[data-testid="stMain"] > div:last-child,
+    section[data-testid="stMain"] > div:last-child > div:last-child {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }}
+    /* Streamlitのデフォルトの下部余白を削除 */
+    .main {{
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
     }}
     h1 {{
         font-size: 1.75rem !important;
     }}
     .stSidebar {{
         display: none;
+    }}
+    /* ページ全体の下部余白を削除 */
+    body, html {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
     }}
 }}
 /* ロゴのスタイル調整（見切れ防止） */
