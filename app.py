@@ -3,6 +3,7 @@ Streamlit AIコンシェルジュアプリ
 """
 import streamlit as st
 import os
+import base64
 from dotenv import load_dotenv
 from services.llm import generate_response, initialize_gemini
 from services.sheets import load_course_data
@@ -29,11 +30,33 @@ def render_logo():
     ]
     for logo_path in candidates:
         if os.path.exists(logo_path):
-            st.image(logo_path, width=140)
+            st.image(logo_path, width=100)
             st.session_state.logo_loaded = True
             return True
     st.session_state.logo_loaded = False
     return False
+
+
+def get_custom_icon(role: str):
+    """
+    カスタムアイコンを取得（assets/user_icon.png または assets/assistant_icon.png）
+    """
+    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+    icon_path = os.path.join(assets_dir, f"{role}_icon.png")
+    if os.path.exists(icon_path):
+        return icon_path
+    return None
+
+
+def _get_image_base64(image_path: str) -> str:
+    """
+    画像ファイルをbase64エンコードして返す
+    """
+    try:
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    except Exception:
+        return ""
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
@@ -53,7 +76,7 @@ def get_default_guidelines():
 
 # ページ設定
 st.set_page_config(
-    page_title="AIコンシェルジュ - ねんねママのファミリーシップ",
+    page_title="ファミリーシップ案内人 - ねんねママのファミリーシップ",
     page_icon="💬",
     layout="wide"
 )
@@ -94,15 +117,37 @@ header_left, header_right = st.columns([1, 5])
 with header_left:
     render_logo()
 with header_right:
-    st.title("💬 AIコンシェルジュ")
+    # タイトルにassistant_iconを使用
+    assistant_icon_path = get_custom_icon("assistant")
+    if assistant_icon_path:
+        st.markdown(
+            f"""
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
+                <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
+                     style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />
+                <h1 style="margin: 0; font-size: 2.25rem;">ファミリーシップ案内人</h1>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.title("💬 ファミリーシップ案内人")
     st.markdown("**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。")
 
-# チャット履歴の表示
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# チャット履歴の表示エリア（スクロール可能）
+# メッセージがある場合のみ表示
+if st.session_state.messages:
+    for message in st.session_state.messages:
+        # カスタムアイコンの取得
+        icon_path = get_custom_icon(message["role"])
+        if icon_path:
+            with st.chat_message(message["role"], avatar=icon_path):
+                st.markdown(message["content"])
+        else:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
-# カスタムCSSで全体のスタイルを微調整（柔らかいピンク×ミントベース）
+# カスタムCSSで全体のスタイルを微調整（柔らかいピンク×ミントベース + チャットUI）
 st.markdown(
     f"""
 <style>
@@ -115,14 +160,17 @@ st.markdown(
 }}
 
 html, body, .stApp {{
-    height: 100%;
+    height: 100vh;
     background: linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
+    overflow: hidden;
 }}
 
 .main {{
     background: radial-gradient(circle at 20% 20%, rgba(249,232,239,0.9), transparent 35%),
                 radial-gradient(circle at 80% 0%, rgba(231,244,243,0.9), transparent 30%),
                 linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
+    height: 100vh;
+    overflow-y: auto;
 }}
 section.main > div {{
     background: transparent;
@@ -136,10 +184,32 @@ section.main > div {{
 .block-container {{
     background: rgba(255,255,255,0.96);
     border-radius: 18px;
-    padding: 2rem 2.4rem;
+    padding: 1.5rem 2rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
     max-width: 1200px;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 4rem);
+}}
+/* チャット履歴エリア（スクロール可能） */
+div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
+    max-height: calc(100vh - 350px);
+    overflow-y: auto;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}}
+/* 入力フォームを下に固定 */
+form[data-testid="stForm"] {{
+    position: sticky;
+    bottom: 0;
+    background: rgba(255,255,255,0.98);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    margin-top: auto;
+    z-index: 100;
 }}
 .stMarkdown a {{
     color: #0f7b8e;
@@ -156,6 +226,7 @@ section.main > div {{
     padding: 14px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     overflow: visible;
+    margin-bottom: 1rem;
 }}
 .stChatMessage[data-testid="stChatMessage-user"] {{
     background: linear-gradient(135deg, rgba(249,232,239,0.55), rgba(231,244,243,0.45));
@@ -163,6 +234,11 @@ section.main > div {{
 }}
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
     border-color: rgba(231,244,243,0.9);
+}}
+/* カスタムアイコンのスタイル */
+.stChatMessage img {{
+    border-radius: 50%;
+    object-fit: cover;
 }}
 .stButton>button {{
     background: linear-gradient(120deg, #f8d9e4, #d9f0ee);
@@ -181,6 +257,7 @@ section.main > div {{
     background: var(--white);
     border-radius: 12px;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid rgba(45,42,50,0.1);
 }}
 .stTextArea label, label {{
     color: var(--navy);
@@ -189,18 +266,23 @@ section.main > div {{
 .stTextInput>div>div>input {{
     background: var(--white);
 }}
+/* ヘッダー部分の調整 */
+div[data-testid="stVerticalBlock"]:has(img[src*="concierge_logo"]) {{
+    margin-bottom: 0.5rem;
+}}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# 入力フォーム（Enterキーで自動送信されない）
+# 入力フォーム（下に固定、Enterキーで自動送信されない）
 with st.form(key="user_input_form", clear_on_submit=True):
     user_input = st.text_area(
-        "育児の悩みや質問を入力してください...",
+        "質問や相談を入力してください...",
         key="user_input",
         height=100,
-        help="Shift+Enterで改行、送信ボタンで送信します"
+        help="Shift+Enterで改行、送信ボタンで送信します",
+        placeholder="例: 3ヶ月の夜泣きに効く講座を教えて / FANTSアプリでライブの視聴URLはどこ？"
     )
     submit_button = st.form_submit_button("送信", use_container_width=True)
 
@@ -208,33 +290,25 @@ if submit_button and user_input:
     # ユーザーメッセージを履歴に追加
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # ユーザーメッセージを表示
-    with st.chat_message("user"):
-        st.markdown(user_input)
-    
     # AI応答を生成
-    with st.chat_message("assistant"):
-        with st.spinner("考えています..."):
-            try:
-                course_data = get_course_data()
-                guidelines = st.session_state.get("guidelines")
-                response = generate_response(user_input, course_data, guidelines)
-                st.markdown(response)
-
-                # AIメッセージを履歴に追加
-                st.session_state.messages.append({"role": "assistant", "content": response})
-            except Exception as e:
-                error_message = f"エラーが発生しました: {str(e)}"
-                st.error(error_message)
-                st.session_state.messages.append({"role": "assistant", "content": error_message})
+    with st.spinner("考えています..."):
+        try:
+            course_data = get_course_data()
+            guidelines = st.session_state.get("guidelines")
+            response = generate_response(user_input, course_data, guidelines)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        except Exception as e:
+            error_message = f"エラーが発生しました: {str(e)}"
+            st.session_state.messages.append({"role": "assistant", "content": error_message})
+    
+    # ページを再読み込みしてメッセージを表示
+    st.rerun()
 
 
-# フッター
-st.divider()
+# フッター（入力フォームの下に表示）
 st.markdown(
-    "<div style='text-align: center; color: gray;'>"
-    "© ねんねママのファミリーシップ - AIコンシェルジュ"
+    "<div style='text-align: center; color: gray; padding: 1rem; font-size: 0.85rem;'>"
+    "© ねんねママのファミリーシップ - ファミリーシップ案内人"
     "</div>",
     unsafe_allow_html=True
 )
-# テスト
