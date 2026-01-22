@@ -217,15 +217,23 @@ section[data-testid="stMain"] > div,
     overflow-x: hidden !important;
 }}
 /* Streamlitのデフォルトヘッダーとの間隔を確保 */
-section[data-testid="stMain"] > div:first-child,
-section[data-testid="stMain"] > div:first-child > div:first-child {{
+section[data-testid="stMain"] > div:first-child {{
     padding-top: 1.5rem !important;
+    margin-top: 0.5rem !important;
+}}
+section[data-testid="stMain"] > div:first-child > div:first-child {{
+    padding-top: 0.2rem !important;
     margin-top: 0.5rem !important;
 }}
 /* タイトルを含む最初のブロックに余白を追加 */
 div[data-testid="stVerticalBlock"]:first-of-type {{
     padding-top: 1rem !important;
     margin-top: 0.5rem !important;
+}}
+/* stVerticalBlockのpadding-topとmargin-topを0.1remに */
+div[data-testid="stVerticalBlock"] {{
+    padding-top: 0.1rem !important;
+    margin-top: 0.1rem !important;
 }}
 /* チャット履歴エリア（スクロール可能、最大限のスペースを確保） */
 div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
