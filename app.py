@@ -186,12 +186,28 @@ section.main > div {{
     padding: 1rem 1.5rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
     max-width: 1200px;
-    margin-top: 0.5rem;
+    margin-top: 1.5rem;
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
     height: calc(100vh - 2rem);
     max-height: calc(100vh - 2rem);
+}}
+/* タイトル部分のヘッダー被りを防止 */
+h1, div:has(> h1), div:has(> img[src*="assistant_icon"]) {{
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
+}}
+/* Streamlitのデフォルトヘッダーとの間隔を確保 */
+section[data-testid="stMain"] > div:first-child,
+section[data-testid="stMain"] > div:first-child > div:first-child {{
+    padding-top: 1.5rem !important;
+    margin-top: 0.5rem !important;
+}}
+/* タイトルを含む最初のブロックに余白を追加 */
+div[data-testid="stVerticalBlock"]:first-of-type {{
+    padding-top: 1rem !important;
+    margin-top: 0.5rem !important;
 }}
 /* チャット履歴エリア（スクロール可能、最大限のスペースを確保） */
 div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
@@ -314,7 +330,7 @@ with st.form(key="user_input_form", clear_on_submit=True):
         help="Shift+Enterで改行、送信ボタンで送信します",
         placeholder="例: 3ヶ月の夜泣きに効く講座を教えて / FANTSアプリでライブの視聴URLはどこ？"
     )
-    submit_button = st.form_submit_button("送信", use_container_width=True)
+    submit_button = st.form_submit_button("シップちゃんに案内してもらう", use_container_width=True)
     # フッターを入力フォーム内に配置
     st.markdown(
         "<div style='text-align: center; color: rgba(128,128,128,0.5); padding: 0.25rem 0; font-size: 0.7rem; margin: 0;'>"
