@@ -122,10 +122,10 @@ assistant_icon_path = get_custom_icon("assistant")
 if assistant_icon_path:
     st.markdown(
         f"""
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
+        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 0.5rem; margin-top: 0; padding-top: 0;">
             <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
-                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />
-            <h1 style="margin: 0; font-size: 2.25rem;">ファミリーシップ案内人</h1>
+                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 0; padding-top: 0; flex-shrink: 0;" />
+            <h1 style="margin: 0; padding-top: 0; font-size: 2.25rem; line-height: 1.2;">ファミリーシップ案内人</h1>
         </div>
         """,
         unsafe_allow_html=True
@@ -201,6 +201,21 @@ section.main > div {{
 h1, div:has(> h1), div:has(> img[src*="assistant_icon"]) {{
     margin-top: 1rem !important;
     padding-top: 1rem !important;
+}}
+/* タイトル部分のアイコンとテキストの位置を統一 */
+div:has(> img[src*="assistant_icon"]) {{
+    display: flex;
+    align-items: flex-start;
+}}
+div:has(> img[src*="assistant_icon"]) img {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    vertical-align: top;
+}}
+div:has(> img[src*="assistant_icon"]) h1 {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    line-height: 1.2;
 }}
 /* Streamlitのデフォルトヘッダーとの間隔を確保 */
 section[data-testid="stMain"] > div:first-child,
@@ -279,6 +294,19 @@ div:has(> div:contains("©")) div {{
     box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     overflow: visible;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+}}
+/* チャットメッセージのアイコンとテキストの位置を統一 */
+.stChatMessage > div:first-child {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    align-self: flex-start;
+}}
+.stChatMessage > div:last-child {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    flex: 1;
 }}
 .stChatMessage[data-testid="stChatMessage-user"] {{
     background: linear-gradient(135deg, rgba(249,232,239,0.55), rgba(231,244,243,0.45));
@@ -291,6 +319,16 @@ div:has(> div:contains("©")) div {{
 .stChatMessage img {{
     border-radius: 50%;
     object-fit: cover;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    vertical-align: top;
+}}
+/* チャットメッセージ内のテキストの上の余白を削除 */
+.stChatMessage .stMarkdown,
+.stChatMessage .stMarkdown > p,
+.stChatMessage .stMarkdown > div {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }}
 .stButton>button {{
     background: linear-gradient(120deg, #f6c9d5, #c7e7e5) !important;
