@@ -75,9 +75,13 @@ def get_default_guidelines():
 
 
 # ページ設定
+# page_iconは絵文字または画像ファイルのパス（相対パスまたはURL）
+assistant_icon_for_page = get_custom_icon("assistant")
+page_icon_path = assistant_icon_for_page if assistant_icon_for_page else "💬"
+
 st.set_page_config(
     page_title="ファミリーシップ案内人 - ねんねママのファミリーシップ",
-    page_icon="💬",
+    page_icon=page_icon_path,
     layout="wide"
 )
 
@@ -217,18 +221,28 @@ div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
     margin-bottom: 0;
     min-height: 0;
 }}
-/* 入力フォームを下に固定（余白を最小化） */
+/* 入力フォームを下に固定（余白を最小化、背景を完全に不透明に） */
 form[data-testid="stForm"] {{
     position: sticky;
     bottom: 0;
-    background: rgba(255,255,255,0.98);
+    background: #ffffff !important;
     padding: 0.75rem;
     border-radius: 12px;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
     margin-top: 0.5rem;
     margin-bottom: 0;
-    z-index: 100;
+    z-index: 1000 !important;
     flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,1);
+}}
+/* 入力フォーム内のコンテナも不透明に */
+form[data-testid="stForm"] > div {{
+    background: #ffffff !important;
+}}
+/* テキストエリアの背景も確実に白に */
+form[data-testid="stForm"] .stTextArea > div > div > textarea {{
+    background: #ffffff !important;
+    border: 1px solid rgba(45,42,50,0.15) !important;
 }}
 /* 入力フォーム内の要素の余白を削減 */
 form[data-testid="stForm"] .stTextArea {{
@@ -303,6 +317,51 @@ div:has(> div:contains("©")) div {{
 }}
 .stTextInput>div>div>input {{
     background: var(--white);
+}}
+/* レスポンシブ対応：モバイル表示時の調整 */
+@media screen and (max-width: 768px) {{
+    .block-container {{
+        padding: 0.75rem 1rem;
+        margin-top: 0.5rem;
+        border-radius: 12px;
+    }}
+    /* 入力フォームをモバイルで確実に前面に */
+    form[data-testid="stForm"] {{
+        background: #ffffff !important;
+        padding: 0.75rem;
+        border-radius: 12px 12px 0 0;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+        z-index: 1000 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }}
+    /* モバイルで入力フォームの背景を完全に不透明に */
+    form[data-testid="stForm"] > div,
+    form[data-testid="stForm"] .stTextArea,
+    form[data-testid="stForm"] .stTextArea > div,
+    form[data-testid="stForm"] .stTextArea > div > div,
+    form[data-testid="stForm"] .stTextArea > div > div > textarea {{
+        background: #ffffff !important;
+    }}
+    /* チャット履歴エリアに下部の余白を追加（入力フォームの高さ分） */
+    div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
+        padding-bottom: 180px !important;
+    }}
+    /* メインコンテンツの下部余白を追加 */
+    .block-container {{
+        padding-bottom: 180px !important;
+    }}
+    h1 {{
+        font-size: 1.75rem !important;
+    }}
+    .stSidebar {{
+        display: none;
+    }}
 }}
 /* ロゴのスタイル調整（見切れ防止） */
 div[data-testid="stVerticalBlock"]:has(img[src*="concierge_logo"]),
