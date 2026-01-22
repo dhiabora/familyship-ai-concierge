@@ -183,38 +183,55 @@ section.main > div {{
 .block-container {{
     background: rgba(255,255,255,0.96);
     border-radius: 18px;
-    padding: 1.5rem 2rem;
+    padding: 1rem 1.5rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
     max-width: 1200px;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 4rem);
+    height: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
 }}
-/* チャット履歴エリア（スクロール可能） */
+/* チャット履歴エリア（スクロール可能、最大限のスペースを確保） */
 div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
-    max-height: calc(100vh - 380px);
+    flex: 1;
     overflow-y: auto;
-    padding-bottom: 1rem;
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+    min-height: 0;
 }}
-/* 入力フォームを下に固定 */
+/* 入力フォームを下に固定（余白を最小化） */
 form[data-testid="stForm"] {{
     position: sticky;
     bottom: 0;
     background: rgba(255,255,255,0.98);
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: 12px;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-    margin-top: auto;
+    margin-top: 0.5rem;
     margin-bottom: 0;
     z-index: 100;
+    flex-shrink: 0;
+}}
+/* 入力フォーム内の要素の余白を削減 */
+form[data-testid="stForm"] .stTextArea {{
+    margin-bottom: 0.5rem;
+}}
+form[data-testid="stForm"] .stButton {{
+    margin-top: 0;
 }}
 /* フッターの余白を最小化 */
 div:has(> div:contains("©")) {{
     margin-top: 0 !important;
     padding-top: 0 !important;
+    padding-bottom: 0.25rem !important;
+    margin-bottom: 0 !important;
+}}
+/* フッターテキストのスタイル */
+div:has(> div:contains("©")) div {{
+    margin: 0 !important;
+    padding: 0.25rem 0 !important;
 }}
 .stMarkdown a {{
     color: #0f7b8e;
@@ -293,11 +310,18 @@ with st.form(key="user_input_form", clear_on_submit=True):
     user_input = st.text_area(
         "質問や相談を入力してください...",
         key="user_input",
-        height=100,
+        height=80,
         help="Shift+Enterで改行、送信ボタンで送信します",
         placeholder="例: 3ヶ月の夜泣きに効く講座を教えて / FANTSアプリでライブの視聴URLはどこ？"
     )
     submit_button = st.form_submit_button("送信", use_container_width=True)
+    # フッターを入力フォーム内に配置
+    st.markdown(
+        "<div style='text-align: center; color: rgba(128,128,128,0.5); padding: 0.25rem 0; font-size: 0.7rem; margin: 0;'>"
+        "© ねんねママのファミリーシップ"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
 if submit_button and user_input:
     # ユーザーメッセージを履歴に追加
@@ -317,11 +341,3 @@ if submit_button and user_input:
     # ページを再読み込みしてメッセージを表示
     st.rerun()
 
-
-# フッター（最小限の表示、スペースを圧迫しない）
-st.markdown(
-    "<div style='text-align: center; color: rgba(128,128,128,0.6); padding: 0.5rem 0; font-size: 0.75rem; margin-top: 0.5rem;'>"
-    "© ねんねママのファミリーシップ"
-    "</div>",
-    unsafe_allow_html=True
-)
