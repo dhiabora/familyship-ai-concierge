@@ -118,7 +118,7 @@ with st.sidebar:
 
 # メインコンテンツ（ヘッダー）
 st.title("💬 ファミリーシップ案内人")
-st.markdown("<div style='margin-top: 0.75rem;'>**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。</div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 0.75rem;'>ねんねママのファミリーシップ - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。</div>", unsafe_allow_html=True)
 
 # ロゴをタイトルの下に表示
 render_logo()
