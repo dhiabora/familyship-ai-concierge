@@ -124,8 +124,8 @@ if assistant_icon_path:
         f"""
         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 0.5rem; margin-top: 0; padding-top: 0;">
             <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
-                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 0; padding-top: 0; flex-shrink: 0;" />
-            <h1 style="margin: 0; padding-top: 0; font-size: 2.25rem; line-height: 1.2;">ファミリーシップ案内人</h1>
+                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin: 0; padding: 0; flex-shrink: 0; vertical-align: top;" />
+            <h1 style="margin: 0; padding: 0; font-size: 2.25rem; line-height: 32px;">ファミリーシップ案内人</h1>
         </div>
         """,
         unsafe_allow_html=True
@@ -204,18 +204,22 @@ h1, div:has(> h1), div:has(> img[src*="assistant_icon"]) {{
 }}
 /* タイトル部分のアイコンとテキストの位置を統一 */
 div:has(> img[src*="assistant_icon"]) {{
-    display: flex;
-    align-items: flex-start;
+    display: flex !important;
+    align-items: flex-start !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }}
 div:has(> img[src*="assistant_icon"]) img {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    vertical-align: top;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: top !important;
+    flex-shrink: 0;
 }}
 div:has(> img[src*="assistant_icon"]) h1 {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    line-height: 1.2;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 32px !important;
+    align-self: flex-start;
 }}
 /* Streamlitのデフォルトヘッダーとの間隔を確保 */
 section[data-testid="stMain"] > div:first-child,
@@ -294,19 +298,6 @@ div:has(> div:contains("©")) div {{
     box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     overflow: visible;
     margin-bottom: 1rem;
-    display: flex;
-    align-items: flex-start;
-}}
-/* チャットメッセージのアイコンとテキストの位置を統一 */
-.stChatMessage > div:first-child {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    align-self: flex-start;
-}}
-.stChatMessage > div:last-child {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    flex: 1;
 }}
 .stChatMessage[data-testid="stChatMessage-user"] {{
     background: linear-gradient(135deg, rgba(249,232,239,0.55), rgba(231,244,243,0.45));
@@ -315,20 +306,47 @@ div:has(> div:contains("©")) div {{
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
     border-color: rgba(231,244,243,0.9);
 }}
+/* チャットメッセージのアイコンとテキストの位置を統一 */
+.stChatMessage > div {{
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px;
+}}
+/* アイコン部分の余白を削除 */
+.stChatMessage > div > div:first-child,
+.stChatMessage > div > div:first-child > img,
+.stChatMessage img[data-testid="stChatAvatar"] {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    vertical-align: top !important;
+    align-self: flex-start !important;
+}}
+/* テキスト部分の余白を削除 */
+.stChatMessage > div > div:last-child,
+.stChatMessage > div > div:last-child > div {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    flex: 1;
+}}
+/* チャットメッセージ内のテキストの上の余白を削除 */
+.stChatMessage .stMarkdown,
+.stChatMessage .stMarkdown > p:first-child,
+.stChatMessage .stMarkdown > div:first-child,
+.stChatMessage .stMarkdown > *:first-child {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}}
 /* カスタムアイコンのスタイル */
 .stChatMessage img {{
     border-radius: 50%;
     object-fit: cover;
     margin-top: 0 !important;
     padding-top: 0 !important;
-    vertical-align: top;
-}}
-/* チャットメッセージ内のテキストの上の余白を削除 */
-.stChatMessage .stMarkdown,
-.stChatMessage .stMarkdown > p,
-.stChatMessage .stMarkdown > div {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    vertical-align: top !important;
 }}
 .stButton>button {{
     background: linear-gradient(120deg, #f6c9d5, #c7e7e5) !important;
