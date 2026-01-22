@@ -113,26 +113,25 @@ with st.sidebar:
 
 
 # メインコンテンツ（ヘッダー）
-header_left, header_right = st.columns([1, 5])
-with header_left:
-    render_logo()
-with header_right:
-    # タイトルにassistant_iconを使用
-    assistant_icon_path = get_custom_icon("assistant")
-    if assistant_icon_path:
-        st.markdown(
-            f"""
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
-                <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
-                     style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />
-                <h1 style="margin: 0; font-size: 2.25rem;">ファミリーシップ案内人</h1>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.title("💬 ファミリーシップ案内人")
-    st.markdown("**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。")
+# タイトルにassistant_iconを使用
+assistant_icon_path = get_custom_icon("assistant")
+if assistant_icon_path:
+    st.markdown(
+        f"""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
+            <img src="data:image/png;base64,{_get_image_base64(assistant_icon_path)}" 
+                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />
+            <h1 style="margin: 0; font-size: 2.25rem;">ファミリーシップ案内人</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.title("💬 ファミリーシップ案内人")
+st.markdown("**ねんねママのファミリーシップ** - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。")
+
+# ロゴをタイトルの下に表示
+render_logo()
 
 # チャット履歴の表示エリア（スクロール可能）
 # メッセージがある場合のみ表示
@@ -188,17 +187,17 @@ section.main > div {{
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
     max-width: 1200px;
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: flex;
     flex-direction: column;
     min-height: calc(100vh - 4rem);
 }}
 /* チャット履歴エリア（スクロール可能） */
 div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
-    max-height: calc(100vh - 350px);
+    max-height: calc(100vh - 380px);
     overflow-y: auto;
     padding-bottom: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }}
 /* 入力フォームを下に固定 */
 form[data-testid="stForm"] {{
@@ -209,7 +208,13 @@ form[data-testid="stForm"] {{
     border-radius: 12px;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
     margin-top: auto;
+    margin-bottom: 0;
     z-index: 100;
+}}
+/* フッターの余白を最小化 */
+div:has(> div:contains("©")) {{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }}
 .stMarkdown a {{
     color: #0f7b8e;
@@ -266,9 +271,17 @@ form[data-testid="stForm"] {{
 .stTextInput>div>div>input {{
     background: var(--white);
 }}
-/* ヘッダー部分の調整 */
-div[data-testid="stVerticalBlock"]:has(img[src*="concierge_logo"]) {{
-    margin-bottom: 0.5rem;
+/* ロゴのスタイル調整（見切れ防止） */
+div[data-testid="stVerticalBlock"]:has(img[src*="concierge_logo"]),
+div:has(img[src*="concierge_logo"]) {{
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}}
+div:has(img[src*="concierge_logo"]) img {{
+    max-width: 100px;
+    height: auto;
+    object-fit: contain;
 }}
 </style>
 """,
@@ -305,10 +318,10 @@ if submit_button and user_input:
     st.rerun()
 
 
-# フッター（入力フォームの下に表示）
+# フッター（最小限の表示、スペースを圧迫しない）
 st.markdown(
-    "<div style='text-align: center; color: gray; padding: 1rem; font-size: 0.85rem;'>"
-    "© ねんねママのファミリーシップ - ファミリーシップ案内人"
+    "<div style='text-align: center; color: rgba(128,128,128,0.6); padding: 0.5rem 0; font-size: 0.75rem; margin-top: 0.5rem;'>"
+    "© ねんねママのファミリーシップ"
     "</div>",
     unsafe_allow_html=True
 )
