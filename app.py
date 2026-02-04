@@ -30,7 +30,7 @@ def render_logo():
     ]
     for logo_path in candidates:
         if os.path.exists(logo_path):
-            st.image(logo_path, width=100)
+            st.image(logo_path, width=150)
             st.session_state.logo_loaded = True
             return True
     st.session_state.logo_loaded = False
@@ -117,7 +117,7 @@ with st.sidebar:
 
 
 # メインコンテンツ（ヘッダー）
-st.title("💬 ファミリーシップ案内人")
+st.title("👨‍👩‍👧‍👦 ファミリーシップ案内人")
 st.markdown("<div style='margin-top: 0.75rem;'>ねんねママのファミリーシップ - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。</div>", unsafe_allow_html=True)
 
 # ロゴをタイトルの下に表示
@@ -174,10 +174,10 @@ section.main > div {{
     color: var(--navy);
 }}
 .stSidebar {{
-    background: rgba(255,255,255,0.92);
+    background: #FFF4F0;
 }}
 .block-container {{
-    background: rgba(255,255,255,0.96);
+    background: #FFF4F0;
     border-radius: 18px;
     padding: 1rem 1.5rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
@@ -243,11 +243,11 @@ div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
     margin-bottom: 0;
     min-height: 0;
 }}
-/* 入力フォームを下に固定（余白を最小化、背景を完全に不透明に） */
+/* 入力フォームを下に固定（余白を最小化、背景をベージュに） */
 form[data-testid="stForm"] {{
     position: sticky;
     bottom: 0;
-    background: #ffffff !important;
+    background: #FFF4F0 !important;
     padding: 0.75rem;
     border-radius: 12px;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
@@ -255,13 +255,13 @@ form[data-testid="stForm"] {{
     margin-bottom: 0;
     z-index: 1000 !important;
     flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,1);
+    border: 1px solid rgba(255,244,240,1);
 }}
-/* 入力フォーム内のコンテナも不透明に */
+/* 入力フォーム内のコンテナもベージュに */
 form[data-testid="stForm"] > div {{
-    background: #ffffff !important;
+    background: #FFF4F0 !important;
 }}
-/* テキストエリアの背景も確実に白に */
+/* テキストエリアの背景もベージュに */
 form[data-testid="stForm"] .stTextArea > div > div > textarea {{
     background: #ffffff !important;
     border: 1px solid rgba(45,42,50,0.15) !important;
@@ -295,7 +295,7 @@ div:has(> div:contains("©")) div {{
 }}
 .stChatMessage {{
     border: 1px solid rgba(45,42,50,0.08);
-    background: var(--white);
+    background: #FFF4F0;
     border-radius: 16px;
     padding: 14px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.05);
@@ -407,7 +407,7 @@ form[data-testid="stForm"] label {{
     }}
     /* 入力フォームをモバイルで確実に前面に、画面最下部に固定 */
     form[data-testid="stForm"] {{
-        background: #ffffff !important;
+        background: #FFF4F0 !important;
         padding: 0.75rem !important;
         padding-bottom: 0.5rem !important;
         border-radius: 12px 12px 0 0 !important;
@@ -422,11 +422,13 @@ form[data-testid="stForm"] label {{
         margin: 0 !important;
         margin-bottom: 0 !important;
     }}
-    /* モバイルで入力フォームの背景を完全に不透明に */
+    /* モバイルで入力フォームの背景をベージュに */
     form[data-testid="stForm"] > div,
     form[data-testid="stForm"] .stTextArea,
     form[data-testid="stForm"] .stTextArea > div,
-    form[data-testid="stForm"] .stTextArea > div > div,
+    form[data-testid="stForm"] .stTextArea > div > div {{
+        background: #FFF4F0 !important;
+    }}
     form[data-testid="stForm"] .stTextArea > div > div > textarea {{
         background: #ffffff !important;
     }}
@@ -513,7 +515,7 @@ form[data-testid="stForm"] label {{
         padding-bottom: 0 !important;
     }}
 }}
-/* ロゴのスタイル調整（見切れ防止） */
+/* ロゴのスタイル調整（見切れ防止、画像の品質向上） */
 div[data-testid="stVerticalBlock"]:has(img[src*="concierge_logo"]),
 div:has(img[src*="concierge_logo"]) {{
     margin-top: 1rem;
@@ -521,9 +523,13 @@ div:has(img[src*="concierge_logo"]) {{
     text-align: center;
 }}
 div:has(img[src*="concierge_logo"]) img {{
-    max-width: 100px;
+    max-width: 150px;
+    width: 150px;
     height: auto;
     object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: auto;
 }}
 </style>
 """,
