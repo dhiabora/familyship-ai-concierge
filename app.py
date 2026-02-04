@@ -149,23 +149,23 @@ st.markdown(
 }}
 
 html, body, .stApp {{
-    height: 100vh;
     width: 100%;
     max-width: 100vw;
     background: linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
     overflow-x: hidden !important;
-    overflow-y: auto;
+    overflow-y: visible !important;
+    min-height: 100vh;
 }}
 
 .main {{
     background: radial-gradient(circle at 20% 20%, rgba(249,232,239,0.9), transparent 35%),
                 radial-gradient(circle at 80% 0%, rgba(231,244,243,0.9), transparent 30%),
                 linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
-    height: 100vh;
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden !important;
-    overflow-y: auto;
+    overflow-y: visible !important;
+    min-height: 100vh;
 }}
 section.main > div {{
     background: transparent;
@@ -187,8 +187,7 @@ section.main > div {{
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 2rem);
-    max-height: calc(100vh - 2rem);
+    min-height: calc(100vh - 2rem);
     overflow-x: hidden !important;
     box-sizing: border-box;
 }}
@@ -238,7 +237,7 @@ div[data-testid="stVerticalBlock"] {{
 /* チャット履歴エリア（スクロール可能、最大限のスペースを確保） */
 div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
     flex: 1;
-    overflow-y: auto;
+    overflow-y: visible;
     padding-bottom: 0.5rem;
     margin-bottom: 0;
     min-height: 0;
@@ -393,9 +392,12 @@ form[data-testid="stForm"] label {{
         width: 100% !important;
         max-width: 100vw !important;
         overflow-x: hidden !important;
+        overflow-y: visible !important;
+        height: auto !important;
+        min-height: 100vh;
     }}
     .block-container {{
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 0.5rem;
         margin-top: 0.5rem;
         margin-bottom: 0 !important;
         border-radius: 12px;
@@ -403,7 +405,31 @@ form[data-testid="stForm"] label {{
         width: 100% !important;
         max-width: 100vw !important;
         overflow-x: hidden !important;
+        overflow-y: visible !important;
         box-sizing: border-box !important;
+        min-height: auto !important;
+        height: auto !important;
+    }}
+    /* モバイルで1行の文字数を増やす */
+    .stMarkdown,
+    .stMarkdown p,
+    .stMarkdown div,
+    .stChatMessage .stMarkdown,
+    .stChatMessage .stMarkdown p {{
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+        word-break: keep-all !important;
+        overflow-wrap: break-word !important;
+    }}
+    /* チャットメッセージの幅を最大限に */
+    .stChatMessage {{
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 12px !important;
+    }}
+    /* サイドバーの幅を調整 */
+    .stSidebar {{
+        padding: 0.75rem 0.5rem !important;
     }}
     /* 入力フォームをモバイルで確実に前面に、画面最下部に固定 */
     form[data-testid="stForm"] {{
@@ -454,13 +480,15 @@ form[data-testid="stForm"] label {{
     }}
     /* チャット履歴エリアに下部の余白を追加（入力フォームの高さ分） */
     div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
-        padding-bottom: 180px !important;
+        padding-bottom: 200px !important;
         margin-bottom: 0 !important;
+        overflow-y: visible !important;
     }}
     /* メインコンテンツの下部余白を追加 */
     .block-container {{
-        padding-bottom: 180px !important;
+        padding-bottom: 200px !important;
         margin-bottom: 0 !important;
+        overflow-y: visible !important;
     }}
     /* 入力フォームの下に表示される可能性のある要素を非表示 */
     section[data-testid="stMain"] > div:last-child,
