@@ -1,48 +1,120 @@
 """
 Streamlit AIコンシェルジュアプリ
+ねんねママのファミリーシップ向けの案内人アプリケーション
 """
 import streamlit as st
 import os
 import base64
+from typing import Optional
 from dotenv import load_dotenv
 from services.llm import generate_response, initialize_gemini
 from services.sheets import load_course_data
 from services.knowledge import resolve_guidelines
 from config import get_gemini_api_key
 
-# カラーパレット（ランディングページに合わせたピンク＆ミント）
-PINK = "#f6c9d5"
-MINT = "#c7e7e5"
-NAVY = "#2d2a32"
-WHITE = "#ffffff"
-LIGHT_GRAY = "#f7f7f7"
+
+# ============================================================================
+# 設定の外部化（デザイン設定を一括管理）
+# ============================================================================
+
+# カラーパレット
+COLORS = {
+    "pink": "#f6c9d5",
+    "mint": "#c7e7e5",
+    "navy": "#2d2a32",
+    "white": "#ffffff",
+    "light_gray": "#f7f7f7",
+    "beige": "#FFF4F0",  # 背景色
+    "button_pink": "#f6c9d5",  # ボタン背景色
+    "button_hover": "#f8aacb",  # ボタンホバー色
+    "link": "#0f7b8e",  # リンク色
+}
+
+# デザイン設定
+DESIGN = {
+    "title_icon": "👨‍👩‍👧‍👦",  # タイトル横のアイコン
+    "logo_width": 150,  # ロゴの幅（px）
+    "container_max_width": 1200,  # コンテナの最大幅（px）
+    "border_radius": 18,  # コンテナの角丸（px）
+    "button_border_radius": 12,  # ボタンの角丸（px）
+    "chat_border_radius": 16,  # チャットメッセージの角丸（px）
+}
+
+# アイコンファイル設定
+ICONS = {
+    "logo_candidates": [
+        "concierge_logo.png",
+        "assets:concierge_logo.png",
+    ],
+    "user_icon": "user_icon.png",
+    "assistant_icon": "assistant_icon.png",
+}
+
+# テキスト設定
+TEXTS = {
+    "page_title": "ファミリーシップ案内人 - ねんねママのファミリーシップ",
+    "main_title": "ファミリーシップ案内人",
+    "subtitle": "ねんねママのファミリーシップ - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。",
+    "input_label": "質問や相談を入力してください...",
+    "input_placeholder": "例: 3ヶ月の夜泣きに効く講座を教えて / FANTSアプリでライブの視聴URLはどこ？",
+    "submit_button": "シップちゃんに案内してもらう",
+    "footer": "© ねんねママのファミリーシップ",
+    "loading_message": "考えています...",
+    "error_message": "エラーが発生しました: {error}",
+}
+
+# サイドバー設定
+SIDEBAR = {
+    "usage_title": "💡 使い方",
+    "usage_items": [
+        "ファミリーシップのコンテンツ・講座・イベントの案内役です。",
+        "FANTSアプリの操作や、どの講座を見ればよいかも案内します。",
+    ],
+    "examples_title": "✍️ 質問の例",
+    "examples": [
+        "「○ヶ月の夜泣きに効く講座を教えて」",
+        "「FANTSアプリでライブの視聴URLはどこ？」",
+        "「離乳食の悩みでどのクラスに相談したらいい？」",
+    ],
+    "help_text": "Shift+Enterで改行できます",
+}
+
+# レスポンシブ設定
+RESPONSIVE = {
+    "mobile_breakpoint": 768,  # モバイル判定のブレークポイント（px）
+    "mobile_padding": "0.75rem 0.5rem",
+    "mobile_font_size": "0.95rem",
+    "mobile_line_height": "1.6",
+    "form_bottom_padding": 200,  # モバイル時の入力フォーム下の余白（px）
+}
 
 
-def render_logo():
+# ============================================================================
+# ユーティリティ関数
+# ============================================================================
+
+def get_assets_dir() -> str:
     """
-    アプリのロゴを表示（assets/concierge_logo.png に配置された場合のみ）。
-    ファイル名にコロンが含まれる場合も補足。
+    アセットディレクトリのパスを取得する
+    
+    Returns:
+        str: アセットディレクトリのパス
     """
-    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
-    candidates = [
-        os.path.join(assets_dir, "concierge_logo.png"),
-        os.path.join(assets_dir, "assets:concierge_logo.png"),
-    ]
-    for logo_path in candidates:
-        if os.path.exists(logo_path):
-            st.image(logo_path, width=150)
-            st.session_state.logo_loaded = True
-            return True
-    st.session_state.logo_loaded = False
-    return False
+    return os.path.join(os.path.dirname(__file__), "assets")
 
 
-def get_custom_icon(role: str):
+def get_custom_icon(role: str) -> Optional[str]:
     """
-    カスタムアイコンを取得（assets/user_icon.png または assets/assistant_icon.png）
+    カスタムアイコンを取得する
+    
+    Args:
+        role: ロール名（"user" または "assistant"）
+    
+    Returns:
+        str | None: アイコンファイルのパス、存在しない場合はNone
     """
-    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
-    icon_path = os.path.join(assets_dir, f"{role}_icon.png")
+    assets_dir = get_assets_dir()
+    icon_path = os.path.join(assets_dir, ICONS.get(f"{role}_icon", f"{role}_icon.png"))
     if os.path.exists(icon_path):
         return icon_path
     return None
@@ -51,6 +123,12 @@ def get_custom_icon(role: str):
 def _get_image_base64(image_path: str) -> str:
     """
     画像ファイルをbase64エンコードして返す
+    
+    Args:
+        image_path: 画像ファイルのパス
+    
+    Returns:
+        str: base64エンコードされた画像データ
     """
     try:
         with open(image_path, "rb") as img_file:
@@ -58,93 +136,111 @@ def _get_image_base64(image_path: str) -> str:
     except Exception:
         return ""
 
-# .envファイルから環境変数を読み込む
-load_dotenv()
 
-# 講座データをキャッシュで読み込む
-@st.cache_data
-def get_course_data():
-    """講座データを取得（キャッシュ機能付き）"""
-    return load_course_data()
+# ============================================================================
+# UI関数（画面表示部分）
+# ============================================================================
 
-
-@st.cache_data
-def get_default_guidelines():
-    """デフォルトのガイドラインを取得"""
-    return resolve_guidelines()
-
-
-# ページ設定
-# page_iconは絵文字または画像ファイルのパス（相対パスまたはURL）
-assistant_icon_for_page = get_custom_icon("assistant")
-page_icon_path = assistant_icon_for_page if assistant_icon_for_page else "💬"
-
-st.set_page_config(
-    page_title="ファミリーシップ案内人 - ねんねママのファミリーシップ",
-    page_icon=page_icon_path,
-    layout="wide"
-)
-
-# セッション状態の初期化
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "guidelines" not in st.session_state:
-    st.session_state.guidelines = get_default_guidelines()
-if "logo_loaded" not in st.session_state:
+def render_logo() -> bool:
+    """
+    アプリのロゴを表示する
+    
+    Returns:
+        bool: ロゴが表示された場合はTrue、そうでない場合はFalse
+    """
+    assets_dir = get_assets_dir()
+    for logo_filename in ICONS["logo_candidates"]:
+        logo_path = os.path.join(assets_dir, logo_filename)
+        if os.path.exists(logo_path):
+            st.image(logo_path, width=DESIGN["logo_width"])
+            st.session_state.logo_loaded = True
+            return True
     st.session_state.logo_loaded = False
-
-# APIキーの確認（環境変数のみ）
-api_key = get_gemini_api_key()
-if not api_key:
-    st.error("⚠️ エラー: GEMINI_API_KEY環境変数が設定されていません。")
-    st.stop()
-
-# サイドバー
-with st.sidebar:
-    st.markdown("### 💡 使い方")
-    st.markdown("""
-    - ファミリーシップのコンテンツ・講座・イベントの案内役です。
-    - FANTSアプリの操作や、どの講座を見ればよいかも案内します。
-    """)
-    st.caption("Shift+Enterで改行できます")
-
-    st.markdown("### ✍️ 質問の例")
-    st.markdown("""
-    - 「○ヶ月の夜泣きに効く講座を教えて」
-    - 「FANTSアプリでライブの視聴URLはどこ？」
-    - 「離乳食の悩みでどのクラスに相談したらいい？」
-    """)
+    return False
 
 
-# メインコンテンツ（ヘッダー）
-st.title("👨‍👩‍👧‍👦 ファミリーシップ案内人")
-st.markdown("<div style='margin-top: 0.75rem;'>ねんねママのファミリーシップ - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。</div>", unsafe_allow_html=True)
+def render_sidebar():
+    """
+    サイドバーを表示する
+    """
+    st.markdown(f"### {SIDEBAR['usage_title']}")
+    usage_text = "\n    - ".join([""] + SIDEBAR["usage_items"])
+    st.markdown(usage_text)
+    st.caption(SIDEBAR["help_text"])
 
-# ロゴをタイトルの下に表示
-render_logo()
+    st.markdown(f"### {SIDEBAR['examples_title']}")
+    examples_text = "\n    - ".join([""] + SIDEBAR["examples"])
+    st.markdown(examples_text)
 
-# チャット履歴の表示エリア（スクロール可能）
-# メッセージがある場合のみ表示
-if st.session_state.messages:
-    for message in st.session_state.messages:
-        # カスタムアイコンの取得
-        icon_path = get_custom_icon(message["role"])
-        if icon_path:
-            with st.chat_message(message["role"], avatar=icon_path):
-                st.markdown(message["content"])
-        else:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
 
-# カスタムCSSで全体のスタイルを微調整（柔らかいピンク×ミントベース + チャットUI）
-st.markdown(
-    f"""
+def render_header():
+    """
+    ヘッダー（タイトルと説明）を表示する
+    """
+    st.title(f"{DESIGN['title_icon']} {TEXTS['main_title']}")
+    st.markdown(
+        f"<div style='margin-top: 0.75rem;'>{TEXTS['subtitle']}</div>",
+        unsafe_allow_html=True
+    )
+    render_logo()
+
+
+def render_chat_history():
+    """
+    チャット履歴を表示する
+    """
+    if st.session_state.messages:
+        for message in st.session_state.messages:
+            icon_path = get_custom_icon(message["role"])
+            if icon_path:
+                with st.chat_message(message["role"], avatar=icon_path):
+                    st.markdown(message["content"])
+            else:
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+
+
+def render_input_form():
+    """
+    入力フォームを表示する
+    """
+    with st.form(key="user_input_form", clear_on_submit=True):
+        user_input = st.text_area(
+            TEXTS["input_label"],
+            key="user_input",
+            height=80,
+            help=SIDEBAR["help_text"],
+            placeholder=TEXTS["input_placeholder"]
+        )
+        submit_button = st.form_submit_button(
+            TEXTS["submit_button"],
+            use_container_width=True
+        )
+        # フッターを入力フォーム内に配置
+        st.markdown(
+            f"<div style='text-align: center; color: rgba(128,128,128,0.5); "
+            f"padding: 0.25rem 0; font-size: 0.7rem; margin: 0;'>"
+            f"{TEXTS['footer']}"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+        return user_input, submit_button
+
+
+def generate_css() -> str:
+    """
+    CSSスタイルを生成する
+    
+    Returns:
+        str: CSSスタイルの文字列
+    """
+    return f"""
 <style>
 :root {{
     --pink: #f9e8ef;
     --mint: #e7f4f3;
-    --navy: {NAVY};
-    --white: {WHITE};
+    --navy: {COLORS['navy']};
+    --white: {COLORS['white']};
     --light-gray: #fdfbfc;
 }}
 
@@ -174,14 +270,14 @@ section.main > div {{
     color: var(--navy);
 }}
 .stSidebar {{
-    background: #FFF4F0;
+    background: {COLORS['beige']};
 }}
 .block-container {{
-    background: #FFF4F0;
-    border-radius: 18px;
+    background: {COLORS['beige']};
+    border-radius: {DESIGN['border_radius']}px;
     padding: 1rem 1.5rem;
     box-shadow: 0 12px 38px rgba(0,0,0,0.08);
-    max-width: 1200px;
+    max-width: {DESIGN['container_max_width']}px;
     width: 100%;
     margin-top: 1.5rem;
     margin-bottom: 0;
@@ -246,9 +342,9 @@ div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
 form[data-testid="stForm"] {{
     position: sticky;
     bottom: 0;
-    background: #FFF4F0 !important;
+    background: {COLORS['beige']} !important;
     padding: 0.75rem;
-    border-radius: 12px;
+    border-radius: {DESIGN['button_border_radius']}px;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
     margin-top: 0.5rem;
     margin-bottom: 0;
@@ -258,11 +354,11 @@ form[data-testid="stForm"] {{
 }}
 /* 入力フォーム内のコンテナもベージュに */
 form[data-testid="stForm"] > div {{
-    background: #FFF4F0 !important;
+    background: {COLORS['beige']} !important;
 }}
 /* テキストエリアの背景もベージュに */
 form[data-testid="stForm"] .stTextArea > div > div > textarea {{
-    background: #ffffff !important;
+    background: {COLORS['white']} !important;
     border: 1px solid rgba(45,42,50,0.15) !important;
 }}
 /* 入力フォーム内の要素の余白を削減 */
@@ -285,7 +381,7 @@ div:has(> div:contains("©")) div {{
     padding: 0.25rem 0 !important;
 }}
 .stMarkdown a {{
-    color: #0f7b8e;
+    color: {COLORS['link']};
     text-decoration: none;
     font-weight: 600;
 }}
@@ -294,8 +390,8 @@ div:has(> div:contains("©")) div {{
 }}
 .stChatMessage {{
     border: 1px solid rgba(45,42,50,0.08);
-    background: #FFF4F0;
-    border-radius: 16px;
+    background: {COLORS['beige']};
+    border-radius: {DESIGN['chat_border_radius']}px;
     padding: 14px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     overflow: visible;
@@ -308,7 +404,7 @@ div:has(> div:contains("©")) div {{
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
     border-color: rgba(231,244,243,0.9);
 }}
-/* チャットメッセージのアイコンとテキストの位置を統一 - transformを使った微調整 */
+/* チャットメッセージのアイコンとテキストの位置を統一 */
 .stChatMessage > div {{
     display: flex !important;
     align-items: flex-start !important;
@@ -350,22 +446,22 @@ div:has(> div:contains("©")) div {{
     word-break: break-word !important;
 }}
 .stButton>button {{
-    background: #f6c9d5 !important;
-    color: #2d2a32 !important;
+    background: {COLORS['button_pink']} !important;
+    color: {COLORS['navy']} !important;
     font-weight: 700;
     border: 1px solid rgba(246, 201, 213, 0.3);
-    border-radius: 12px;
+    border-radius: {DESIGN['button_border_radius']}px;
     padding: 0.65rem 1.05rem;
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }}
 .stButton>button:hover {{
-    background: #f8aacb !important;
-    color: #2d2a32 !important;
+    background: {COLORS['button_hover']} !important;
+    color: {COLORS['navy']} !important;
 }}
 .stTextArea > div > div > textarea, textarea {{
     color: #1f1f1f !important;
     background: var(--white);
-    border-radius: 12px;
+    border-radius: {DESIGN['button_border_radius']}px;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
     border: 1px solid rgba(45,42,50,0.1);
 }}
@@ -387,7 +483,7 @@ form[data-testid="stForm"] label {{
     background: var(--white);
 }}
 /* レスポンシブ対応：モバイル表示時の調整 */
-@media screen and (max-width: 768px) {{
+@media screen and (max-width: {RESPONSIVE['mobile_breakpoint']}px) {{
     html, body, .stApp, .main {{
         width: 100% !important;
         max-width: 100vw !important;
@@ -397,7 +493,7 @@ form[data-testid="stForm"] label {{
         min-height: 100vh;
     }}
     .block-container {{
-        padding: 0.75rem 0.5rem;
+        padding: {RESPONSIVE['mobile_padding']};
         margin-top: 0.5rem;
         margin-bottom: 0 !important;
         border-radius: 12px;
@@ -416,8 +512,8 @@ form[data-testid="stForm"] label {{
     .stMarkdown div,
     .stChatMessage .stMarkdown,
     .stChatMessage .stMarkdown p {{
-        font-size: 0.95rem !important;
-        line-height: 1.6 !important;
+        font-size: {RESPONSIVE['mobile_font_size']} !important;
+        line-height: {RESPONSIVE['mobile_line_height']} !important;
         word-break: keep-all !important;
         overflow-wrap: break-word !important;
     }}
@@ -429,11 +525,11 @@ form[data-testid="stForm"] label {{
     }}
     /* サイドバーの幅を調整 */
     .stSidebar {{
-        padding: 0.75rem 0.5rem !important;
+        padding: {RESPONSIVE['mobile_padding']} !important;
     }}
     /* 入力フォームをモバイルで確実に前面に、画面最下部に固定 */
     form[data-testid="stForm"] {{
-        background: #FFF4F0 !important;
+        background: {COLORS['beige']} !important;
         padding: 0.75rem !important;
         padding-bottom: 0.5rem !important;
         border-radius: 12px 12px 0 0 !important;
@@ -453,10 +549,10 @@ form[data-testid="stForm"] label {{
     form[data-testid="stForm"] .stTextArea,
     form[data-testid="stForm"] .stTextArea > div,
     form[data-testid="stForm"] .stTextArea > div > div {{
-        background: #FFF4F0 !important;
+        background: {COLORS['beige']} !important;
     }}
     form[data-testid="stForm"] .stTextArea > div > div > textarea {{
-        background: #ffffff !important;
+        background: {COLORS['white']} !important;
     }}
     /* フッターの余白を完全に削除（モバイル） */
     form[data-testid="stForm"] div:has(> div:contains("©")),
@@ -480,13 +576,13 @@ form[data-testid="stForm"] label {{
     }}
     /* チャット履歴エリアに下部の余白を追加（入力フォームの高さ分） */
     div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
-        padding-bottom: 200px !important;
+        padding-bottom: {RESPONSIVE['form_bottom_padding']}px !important;
         margin-bottom: 0 !important;
         overflow-y: visible !important;
     }}
     /* メインコンテンツの下部余白を追加 */
     .block-container {{
-        padding-bottom: 200px !important;
+        padding-bottom: {RESPONSIVE['form_bottom_padding']}px !important;
         margin-bottom: 0 !important;
         overflow-y: visible !important;
     }}
@@ -551,8 +647,8 @@ div:has(img[src*="concierge_logo"]) {{
     text-align: center;
 }}
 div:has(img[src*="concierge_logo"]) img {{
-    max-width: 150px;
-    width: 150px;
+    max-width: {DESIGN['logo_width']}px;
+    width: {DESIGN['logo_width']}px;
     height: auto;
     object-fit: contain;
     image-rendering: -webkit-optimize-contrast;
@@ -560,43 +656,135 @@ div:has(img[src*="concierge_logo"]) img {{
     image-rendering: auto;
 }}
 </style>
-""",
-    unsafe_allow_html=True,
-)
+"""
 
-# 入力フォーム（下に固定、Enterキーで自動送信されない）
-with st.form(key="user_input_form", clear_on_submit=True):
-    user_input = st.text_area(
-        "質問や相談を入力してください...",
-        key="user_input",
-        height=80,
-        help="Shift+Enterで改行、送信ボタンで送信します",
-        placeholder="例: 3ヶ月の夜泣きに効く講座を教えて / FANTSアプリでライブの視聴URLはどこ？"
-    )
-    submit_button = st.form_submit_button("シップちゃんに案内してもらう", use_container_width=True)
-    # フッターを入力フォーム内に配置
-    st.markdown(
-        "<div style='text-align: center; color: rgba(128,128,128,0.5); padding: 0.25rem 0; font-size: 0.7rem; margin: 0;'>"
-        "© ねんねママのファミリーシップ"
-        "</div>",
-        unsafe_allow_html=True
-    )
 
-if submit_button and user_input:
+# ============================================================================
+# ロジック関数（AIとの通信部分）
+# ============================================================================
+
+@st.cache_data
+def get_course_data():
+    """
+    講座データを取得する（キャッシュ機能付き）
+    
+    Returns:
+        str | None: CSV形式の講座データ、取得できない場合はNone
+    """
+    return load_course_data()
+
+
+@st.cache_data
+def get_default_guidelines():
+    """
+    デフォルトのガイドラインを取得する（キャッシュ機能付き）
+    
+    Returns:
+        str: ガイドラインテキスト
+    """
+    return resolve_guidelines()
+
+
+def initialize_session_state():
+    """
+    セッション状態を初期化する
+    """
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if "guidelines" not in st.session_state:
+        st.session_state.guidelines = get_default_guidelines()
+    if "logo_loaded" not in st.session_state:
+        st.session_state.logo_loaded = False
+
+
+def process_user_message(user_input: str) -> str:
+    """
+    ユーザーメッセージを処理し、AI応答を生成する
+    
+    Args:
+        user_input: ユーザーの入力テキスト
+    
+    Returns:
+        str: AIが生成した応答テキスト
+    
+    Raises:
+        Exception: AI応答生成時にエラーが発生した場合
+    """
+    course_data = get_course_data()
+    guidelines = st.session_state.get("guidelines")
+    return generate_response(user_input, course_data, guidelines)
+
+
+def handle_form_submission(user_input: str):
+    """
+    フォーム送信を処理する
+    
+    Args:
+        user_input: ユーザーの入力テキスト
+    """
     # ユーザーメッセージを履歴に追加
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     # AI応答を生成
-    with st.spinner("考えています..."):
+    with st.spinner(TEXTS["loading_message"]):
         try:
-            course_data = get_course_data()
-            guidelines = st.session_state.get("guidelines")
-            response = generate_response(user_input, course_data, guidelines)
+            response = process_user_message(user_input)
             st.session_state.messages.append({"role": "assistant", "content": response})
         except Exception as e:
-            error_message = f"エラーが発生しました: {str(e)}"
+            error_message = TEXTS["error_message"].format(error=str(e))
             st.session_state.messages.append({"role": "assistant", "content": error_message})
     
     # ページを再読み込みしてメッセージを表示
     st.rerun()
 
+
+# ============================================================================
+# メイン処理
+# ============================================================================
+
+def main():
+    """
+    アプリケーションのメイン処理
+    """
+    # 環境変数の読み込み
+    load_dotenv()
+    
+    # ページ設定
+    assistant_icon_for_page = get_custom_icon("assistant")
+    page_icon_path = assistant_icon_for_page if assistant_icon_for_page else "💬"
+    
+    st.set_page_config(
+        page_title=TEXTS["page_title"],
+        page_icon=page_icon_path,
+        layout="wide"
+    )
+    
+    # セッション状態の初期化
+    initialize_session_state()
+    
+    # APIキーの確認
+    api_key = get_gemini_api_key()
+    if not api_key:
+        st.error("⚠️ エラー: GEMINI_API_KEY環境変数が設定されていません。")
+        st.stop()
+    
+    # CSSスタイルの適用
+    st.markdown(generate_css(), unsafe_allow_html=True)
+    
+    # サイドバーの表示
+    with st.sidebar:
+        render_sidebar()
+    
+    # メインコンテンツの表示
+    render_header()
+    render_chat_history()
+    
+    # 入力フォームの表示と処理
+    user_input, submit_button = render_input_form()
+    
+    if submit_button and user_input:
+        handle_form_submission(user_input)
+
+
+if __name__ == "__main__":
+    main()
