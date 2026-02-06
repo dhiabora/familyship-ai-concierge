@@ -247,16 +247,14 @@ def generate_css() -> str:
 html, body, .stApp {{
     width: 100%;
     max-width: 100vw;
-    background: linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
+    background: {COLORS['beige']} !important;
     overflow-x: hidden !important;
     overflow-y: visible !important;
     min-height: 100vh;
 }}
 
 .main {{
-    background: radial-gradient(circle at 20% 20%, rgba(249,232,239,0.9), transparent 35%),
-                radial-gradient(circle at 80% 0%, rgba(231,244,243,0.9), transparent 30%),
-                linear-gradient(135deg, var(--pink) 0%, var(--mint) 100%);
+    background: {COLORS['beige']} !important;
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden !important;
@@ -264,7 +262,12 @@ html, body, .stApp {{
     min-height: 100vh;
 }}
 section.main > div {{
-    background: transparent;
+    background: {COLORS['beige']} !important;
+}}
+/* 画面下の背景をベージュに統一（グレーを解消） */
+[data-testid="stAppViewContainer"],
+.stApp > div {{
+    background-color: {COLORS['beige']} !important;
 }}
 .stApp {{
     color: var(--navy);
@@ -749,13 +752,10 @@ def main():
     # 環境変数の読み込み
     load_dotenv()
     
-    # ページ設定
-    assistant_icon_for_page = get_custom_icon("assistant")
-    page_icon_path = assistant_icon_for_page if assistant_icon_for_page else "💬"
-    
+    # ページ設定（page_iconは絵文字のみ使用＝モバイル/Cloudでパス指定が失敗するため）
     st.set_page_config(
         page_title=TEXTS["page_title"],
-        page_icon=page_icon_path,
+        page_icon="💬",
         layout="wide"
     )
     
