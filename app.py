@@ -766,6 +766,12 @@ def main():
     api_key = get_gemini_api_key()
     if not api_key:
         st.error("⚠️ エラー: GEMINI_API_KEY環境変数が設定されていません。")
+        st.markdown("""
+        **設定方法：**
+        - **ローカル / Codespaces:** プロジェクト直下に `.env` を作成し、`GEMINI_API_KEY=あなたのキー` を1行で記述してください。
+        - **Streamlit Cloud:** アプリの Settings → Secrets に `GEMINI_API_KEY = "あなたのキー"` を追加してください。
+        - **GitHub Codespaces:** リポジトリの Settings → Secrets and variables → Codespaces で `GEMINI_API_KEY` を追加すると、自動で環境変数になります。
+        """)
         st.stop()
     
     # CSSスタイルの適用
@@ -787,4 +793,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import traceback
+    try:
+        main()
+    except Exception as e:
+        # 起動時エラー時にトレースバックを画面に表示（デバッグ用）
+        st.error("⚠️ アプリの起動中にエラーが発生しました。")
+        st.code(traceback.format_exc(), language="text")
+        st.caption("上記のトレースバックは、ターミナルで `streamlit run app.py` を実行した場合も同じ内容が表示されます。")
+        raise
