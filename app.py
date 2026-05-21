@@ -22,8 +22,8 @@ COLORS = {
     "cream": "#fff8dc",
     "sun": "#ffe89f",
     "sun_deep": "#f5c954",
-    "aqua": "#bfe9ec",
-    "aqua_deep": "#71cbd2",
+    "aqua": "#d9f1f2",
+    "aqua_deep": "#9fd5d9",
     "coral": "#f3a89b",
     "navy": "#2d2a32",
     "white": "#ffffff",
@@ -38,9 +38,9 @@ COLORS = {
 DESIGN = {
     "logo_width": 88,
     "container_max_width": 860,
-    "border_radius": 24,
-    "button_border_radius": 14,
-    "chat_border_radius": 20,
+    "border_radius": 14,
+    "button_border_radius": 12,
+    "chat_border_radius": 14,
 }
 
 # アイコンファイル設定
@@ -213,9 +213,9 @@ def render_header():
         <section class="app-hero">
             <div class="hero-logo">{logo_html}</div>
             <div class="hero-copy">
-                <p class="hero-kicker">ねんねママのファミリーシップ</p>
-                <h1>{TEXTS['main_title']}</h1>
-                <p>{TEXTS['subtitle']}</p>
+                <div class="hero-kicker">ねんねママのファミリーシップ</div>
+                <div class="hero-title">{TEXTS['main_title']}</div>
+                <div class="hero-subtitle">{TEXTS['subtitle']}</div>
             </div>
         </section>
         """,
@@ -308,10 +308,24 @@ html, body, .stApp, .main {{
     width: 100%;
     max-width: 100vw;
     background:
-        radial-gradient(circle at top left, rgba(191, 233, 236, 0.52), transparent 30rem),
-        linear-gradient(180deg, #fffdf1 0%, var(--cream) 42%, #fff6cf 100%) !important;
+        radial-gradient(circle at 18px 18px, rgba(245, 201, 84, 0.16) 0 2px, transparent 2.5px),
+        radial-gradient(circle at calc(100% - 34px) 118px, rgba(243, 168, 155, 0.12) 0 48px, transparent 49px),
+        linear-gradient(180deg, #fffdf3 0%, var(--cream) 48%, #fff4c6 100%) !important;
+    background-size: 28px 28px, auto, auto !important;
     overflow-x: hidden !important;
     min-height: 100vh;
+}}
+
+.stApp::before {{
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, transparent 0 44%, rgba(255, 232, 159, 0.28) 44% 47%, transparent 47% 100%),
+        radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.65) 0 0.45rem, transparent 0.5rem),
+        radial-gradient(circle at 12% 82%, rgba(255, 255, 255, 0.52) 0 0.38rem, transparent 0.43rem);
+    opacity: 0.9;
 }}
 
 [data-testid="stAppViewContainer"],
@@ -386,30 +400,33 @@ footer,
 .app-hero {{
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 0.2rem 1.1rem;
+    gap: 0.82rem;
+    padding: 0.72rem 0.2rem 0.82rem;
 }}
 
 .hero-logo {{
-    width: 82px;
-    height: 82px;
+    width: 74px;
+    height: 74px;
     display: grid;
     place-items: center;
     flex: 0 0 auto;
-    border-radius: 24px;
+    border-radius: 14px;
     background: linear-gradient(145deg, var(--white), #fff0ab);
     border: 1px solid rgba(245, 201, 84, 0.42);
     box-shadow: var(--soft-shadow);
 }}
 
 .hero-logo img {{
-    width: 62px;
-    height: 62px;
+    width: 58px;
+    height: 58px;
     object-fit: contain;
 }}
 
 .hero-copy {{
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.14rem;
 }}
 
 .hero-kicker,
@@ -419,32 +436,61 @@ footer,
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0;
-    margin: 0 0 0.28rem;
+    margin: 0 0 0.12rem;
     text-transform: uppercase;
 }}
 
-.app-hero h1 {{
+.hero-title {{
     color: var(--navy);
     font-size: clamp(1.7rem, 4vw, 2.45rem);
     line-height: 1.18;
     margin: 0;
     letter-spacing: 0;
+    font-weight: 800;
 }}
 
-.app-hero p:last-child {{
+.hero-subtitle {{
     color: var(--text-muted);
     font-size: 0.98rem;
-    line-height: 1.75;
-    margin: 0.45rem 0 0;
+    line-height: 1.62;
+    margin: 0.12rem 0 0;
 }}
 
 .welcome-panel {{
-    margin: 0.35rem 0 1rem;
-    padding: 1.15rem;
-    border-radius: 22px;
-    background: linear-gradient(145deg, rgba(255, 232, 159, 0.68), rgba(191, 233, 236, 0.48));
-    border: 1px solid rgba(245, 201, 84, 0.35);
-    box-shadow: var(--soft-shadow);
+    position: relative;
+    margin: 0.15rem 0 1rem;
+    padding: 1.2rem 1.1rem 1.08rem;
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 250, 225, 0.88)),
+        repeating-linear-gradient(135deg, rgba(245, 201, 84, 0.08) 0 8px, transparent 8px 16px);
+    border: 1px solid rgba(208, 161, 37, 0.26);
+    box-shadow: 0 14px 34px rgba(118, 88, 20, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+}}
+
+.welcome-panel::before {{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7px;
+    background: linear-gradient(90deg, var(--sun-deep), #ffdba6, var(--sun));
+}}
+
+.welcome-panel::after {{
+    content: "";
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(245, 201, 84, 0.28) 0 2px, transparent 2.5px);
+    background-size: 10px 10px;
+    opacity: 0.9;
 }}
 
 .welcome-panel h2 {{
@@ -474,10 +520,10 @@ footer,
     align-items: center;
     min-height: 32px;
     padding: 0.36rem 0.68rem;
-    border-radius: 999px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.82);
-    border: 1px solid rgba(113, 203, 210, 0.38);
-    color: #22646a;
+    border: 1px solid rgba(218, 174, 57, 0.24);
+    color: #72591a;
     font-size: 0.84rem;
     font-weight: 700;
 }}
@@ -503,8 +549,8 @@ footer,
 }}
 
 .stChatMessage[data-testid="stChatMessage-user"] {{
-    background: linear-gradient(145deg, rgba(191, 233, 236, 0.74), rgba(255, 255, 255, 0.88));
-    border-color: rgba(113, 203, 210, 0.45);
+    background: linear-gradient(145deg, rgba(255, 245, 195, 0.86), rgba(255, 255, 255, 0.9));
+    border-color: rgba(245, 201, 84, 0.38);
 }}
 
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
@@ -559,7 +605,7 @@ footer,
     z-index: 50 !important;
     margin: 1rem -0.35rem 0.2rem;
     padding: 0.8rem;
-    border-radius: 22px;
+    border-radius: 14px;
     background: rgba(255, 253, 241, 0.95) !important;
     border: 1px solid rgba(245, 201, 84, 0.34);
     box-shadow: 0 -10px 36px rgba(92, 72, 34, 0.12);
@@ -612,8 +658,8 @@ footer,
 }}
 
 .stTextArea > div > div > textarea:focus {{
-    border-color: var(--aqua-deep) !important;
-    box-shadow: 0 0 0 3px rgba(113, 203, 210, 0.18) !important;
+    border-color: var(--sun-deep) !important;
+    box-shadow: 0 0 0 3px rgba(245, 201, 84, 0.18) !important;
 }}
 
 .stTextArea label, label {{
@@ -635,14 +681,14 @@ footer,
 .sidebar-card {{
     margin: 0.75rem 0;
     padding: 1rem;
-    border-radius: 18px;
+    border-radius: 14px;
     background: rgba(255, 255, 255, 0.76);
     border: 1px solid rgba(245, 201, 84, 0.32);
     box-shadow: 0 8px 22px rgba(92, 72, 34, 0.08);
 }}
 
 .sidebar-card-accent {{
-    background: linear-gradient(145deg, rgba(255, 232, 159, 0.46), rgba(191, 233, 236, 0.34));
+    background: linear-gradient(145deg, rgba(255, 232, 159, 0.46), rgba(255, 255, 255, 0.72));
 }}
 
 .sidebar-card h3 {{
@@ -696,30 +742,30 @@ footer,
     }}
 
     .app-hero {{
-        gap: 0.78rem;
+        gap: 0.68rem;
         align-items: flex-start;
-        padding: 0.55rem 0 0.8rem;
+        padding: 0.5rem 0 0.64rem;
     }}
 
     .hero-logo {{
-        width: 58px;
-        height: 58px;
-        border-radius: 18px;
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
     }}
 
     .hero-logo img {{
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
     }}
 
-    .app-hero h1 {{
+    .hero-title {{
         font-size: 1.62rem;
     }}
 
-    .app-hero p:last-child {{
+    .hero-subtitle {{
         font-size: 0.9rem;
-        line-height: 1.62;
-        margin-top: 0.32rem;
+        line-height: 1.55;
+        margin-top: 0.08rem;
     }}
 
     .hero-kicker,
@@ -729,9 +775,9 @@ footer,
     }}
 
     .welcome-panel {{
-        padding: 1rem;
-        border-radius: 20px;
-        margin-top: 0.2rem;
+        padding: 1.08rem 0.92rem 0.94rem;
+        border-radius: 14px;
+        margin-top: 0.08rem;
     }}
 
     .welcome-panel h2 {{
@@ -761,7 +807,7 @@ footer,
     .stChatMessage {{
         width: 100% !important;
         padding: 0.78rem !important;
-        border-radius: 18px;
+        border-radius: 14px;
         margin: 0.58rem 0;
     }}
 
@@ -781,7 +827,7 @@ footer,
         min-height: 0 !important;
         margin: 0 !important;
         padding: 0.72rem 0.78rem calc(0.62rem + env(safe-area-inset-bottom)) !important;
-        border-radius: 20px 20px 0 0 !important;
+        border-radius: 14px 14px 0 0 !important;
         border-left: 0;
         border-right: 0;
         border-bottom: 0;
