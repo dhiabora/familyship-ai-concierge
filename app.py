@@ -88,9 +88,9 @@ SIDEBAR = {
 RESPONSIVE = {
     "mobile_breakpoint": 768,  # モバイル判定のブレークポイント（px）
     "mobile_padding": "0.75rem 0.8rem",
-    "mobile_font_size": "0.95rem",
-    "mobile_line_height": "1.6",
-    "form_bottom_padding": 184,
+    "mobile_font_size": "0.9rem",
+    "mobile_line_height": "1.68",
+    "form_bottom_padding": 270,
 }
 
 
@@ -542,7 +542,7 @@ footer,
     border: 1px solid rgba(245, 201, 84, 0.24);
     background: rgba(255, 255, 255, 0.82);
     border-radius: {DESIGN['chat_border_radius']}px;
-    padding: 0.9rem 1rem;
+    padding: 0.82rem 0.9rem;
     box-shadow: 0 8px 24px rgba(92, 72, 34, 0.08);
     overflow: visible;
     margin: 0.72rem 0;
@@ -561,7 +561,7 @@ footer,
 .stChatMessage > div {{
     display: flex !important;
     align-items: flex-start !important;
-    gap: 0.75rem !important;
+    gap: 0.62rem !important;
     width: 100% !important;
     overflow-x: hidden !important;
 }}
@@ -592,8 +592,45 @@ footer,
 
 .stChatMessage .stMarkdown p {{
     color: #40382e;
-    line-height: 1.75;
-    margin-bottom: 0.45rem;
+    line-height: 1.7;
+    margin-bottom: 0.52rem;
+}}
+
+.stChatMessage .stMarkdown h1,
+.stChatMessage .stMarkdown h2,
+.stChatMessage .stMarkdown h3,
+.stChatMessage .stMarkdown h4 {{
+    color: var(--navy);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.45;
+    margin: 0.9rem 0 0.45rem;
+    padding: 0;
+}}
+
+.stChatMessage .stMarkdown h1 {{
+    font-size: 1.22rem;
+}}
+
+.stChatMessage .stMarkdown h2 {{
+    font-size: 1.12rem;
+}}
+
+.stChatMessage .stMarkdown h3,
+.stChatMessage .stMarkdown h4 {{
+    font-size: 1.02rem;
+}}
+
+.stChatMessage .stMarkdown ul,
+.stChatMessage .stMarkdown ol {{
+    margin: 0.45rem 0 0.7rem;
+    padding-left: 1.15rem;
+}}
+
+.stChatMessage .stMarkdown li {{
+    color: #40382e;
+    line-height: 1.72;
+    margin: 0.18rem 0;
 }}
 
 [data-testid="stForm"] {{
@@ -806,13 +843,46 @@ footer,
 
     .stChatMessage {{
         width: 100% !important;
-        padding: 0.78rem !important;
+        padding: 0.66rem 0.68rem !important;
         border-radius: 14px;
         margin: 0.58rem 0;
     }}
 
     .stChatMessage > div {{
-        gap: 0.58rem !important;
+        gap: 0.5rem !important;
+    }}
+
+    .stChatMessage .stMarkdown p,
+    .stChatMessage .stMarkdown li {{
+        font-size: 0.9rem !important;
+        line-height: 1.68 !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+    }}
+
+    .stChatMessage .stMarkdown h1 {{
+        font-size: 1.05rem !important;
+        line-height: 1.48 !important;
+        margin: 0.72rem 0 0.36rem !important;
+    }}
+
+    .stChatMessage .stMarkdown h2 {{
+        font-size: 1rem !important;
+        line-height: 1.48 !important;
+        margin: 0.68rem 0 0.34rem !important;
+    }}
+
+    .stChatMessage .stMarkdown h3,
+    .stChatMessage .stMarkdown h4 {{
+        font-size: 0.96rem !important;
+        line-height: 1.48 !important;
+        margin: 0.62rem 0 0.32rem !important;
+    }}
+
+    .stChatMessage .stMarkdown ul,
+    .stChatMessage .stMarkdown ol {{
+        padding-left: 1rem !important;
+        margin: 0.35rem 0 0.55rem !important;
     }}
 
     [data-testid="stForm"] {{
@@ -826,7 +896,7 @@ footer,
         height: auto !important;
         min-height: 0 !important;
         margin: 0 !important;
-        padding: 0.72rem 0.78rem calc(0.62rem + env(safe-area-inset-bottom)) !important;
+        padding: 0.52rem 0.72rem calc(0.48rem + env(safe-area-inset-bottom)) !important;
         border-radius: 14px 14px 0 0 !important;
         border-left: 0;
         border-right: 0;
@@ -836,19 +906,23 @@ footer,
     }}
 
     .stTextArea > div > div > textarea, textarea {{
-        min-height: 68px !important;
+        min-height: 54px !important;
+        height: 54px !important;
+        max-height: 72px !important;
         font-size: 16px !important;
+        line-height: 1.42 !important;
+        padding: 0.65rem 0.78rem !important;
     }}
 
     .stButton>button,
     [data-testid="stBaseButton-secondaryFormSubmit"] {{
-        min-height: 44px;
-        padding: 0.62rem 0.9rem;
+        min-height: 40px;
+        height: 40px;
+        padding: 0.52rem 0.9rem;
     }}
 
     .form-footer {{
-        padding-top: 0.2rem;
-        font-size: 0.66rem;
+        display: none;
     }}
 
     [data-testid="stSidebar"][aria-expanded="true"] {{
