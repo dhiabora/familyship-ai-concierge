@@ -19,25 +19,28 @@ from config import get_gemini_api_key
 
 # カラーパレット
 COLORS = {
-    "pink": "#f6c9d5",
-    "mint": "#c7e7e5",
+    "cream": "#fff8dc",
+    "sun": "#ffe89f",
+    "sun_deep": "#f5c954",
+    "aqua": "#d9f1f2",
+    "aqua_deep": "#9fd5d9",
+    "coral": "#f3a89b",
     "navy": "#2d2a32",
     "white": "#ffffff",
-    "light_gray": "#f7f7f7",
-    "beige": "#FFF4F0",  # 背景色
-    "button_pink": "#f6c9d5",  # ボタン背景色
-    "button_hover": "#f8aacb",  # ボタンホバー色
-    "link": "#0f7b8e",  # リンク色
+    "soft_gray": "#f8f4e8",
+    "text_muted": "#6f6757",
+    "button": "#ffd966",
+    "button_hover": "#f5c954",
+    "link": "#087986",
 }
 
 # デザイン設定
 DESIGN = {
-    "title_icon": "👨‍👩‍👧‍👦",  # タイトル横のアイコン
-    "logo_width": 150,  # ロゴの幅（px）
-    "container_max_width": 1200,  # コンテナの最大幅（px）
-    "border_radius": 18,  # コンテナの角丸（px）
-    "button_border_radius": 12,  # ボタンの角丸（px）
-    "chat_border_radius": 16,  # チャットメッセージの角丸（px）
+    "logo_width": 88,
+    "container_max_width": 860,
+    "border_radius": 14,
+    "button_border_radius": 12,
+    "chat_border_radius": 14,
 }
 
 # アイコンファイル設定
@@ -54,13 +57,15 @@ ICONS = {
 TEXTS = {
     "page_title": "ファミリーシップ案内人 - ねんねママのファミリーシップ",
     "main_title": "ファミリーシップ案内人",
-    "subtitle": "ねんねママのファミリーシップ - サロン全体のご案内役です。講座案内もアプリ操作もお気軽に。",
+    "subtitle": "講座案内も、アプリ操作も、今の困りごとも。ファミリーシップの中をやさしく案内します。",
     "input_label": "質問や相談を入力してください...",
-    "input_placeholder": "例: 3ヶ月の夜泣きに効く講座を教えて / FANTSアプリでライブの視聴URLはどこ？",
-    "submit_button": "シップちゃんに案内してもらう",
+    "input_placeholder": "例: 3ヶ月の夜泣きに効く講座を教えて",
+    "submit_button": "案内してもらう",
     "footer": "© ねんねママのファミリーシップ",
     "loading_message": "考えています...",
     "error_message": "エラーが発生しました: {error}",
+    "welcome_title": "今日はどんなことを探しますか？",
+    "welcome_body": "月齢やお悩みをそのまま書いてください。関連する講座や、FANTS内で見る場所を案内します。",
 }
 
 # サイドバー設定
@@ -82,10 +87,10 @@ SIDEBAR = {
 # レスポンシブ設定
 RESPONSIVE = {
     "mobile_breakpoint": 768,  # モバイル判定のブレークポイント（px）
-    "mobile_padding": "0.75rem 0.5rem",
+    "mobile_padding": "0.75rem 0.8rem",
     "mobile_font_size": "0.95rem",
     "mobile_line_height": "1.6",
-    "form_bottom_padding": 200,  # モバイル時の入力フォーム下の余白（px）
+    "form_bottom_padding": 184,
 }
 
 
@@ -163,26 +168,59 @@ def render_sidebar():
     """
     サイドバーを表示する
     """
-    st.markdown(f"### {SIDEBAR['usage_title']}")
-    usage_text = "\n    - ".join([""] + SIDEBAR["usage_items"])
-    st.markdown(usage_text)
-    st.caption(SIDEBAR["help_text"])
-
-    st.markdown(f"### {SIDEBAR['examples_title']}")
-    examples_text = "\n    - ".join([""] + SIDEBAR["examples"])
-    st.markdown(examples_text)
+    usage_items = "".join(f"<li>{item}</li>" for item in SIDEBAR["usage_items"])
+    examples = "".join(f"<li>{example}</li>" for example in SIDEBAR["examples"])
+    st.markdown(
+        f"""
+        <div class="sidebar-card">
+            <div class="sidebar-kicker">はじめての方へ</div>
+            <h3>{SIDEBAR['usage_title']}</h3>
+            <ul>{usage_items}</ul>
+            <p class="sidebar-note">{SIDEBAR["help_text"]}</p>
+        </div>
+        <div class="sidebar-card sidebar-card-accent">
+            <div class="sidebar-kicker">迷ったら</div>
+            <h3>{SIDEBAR['examples_title']}</h3>
+            <ul>{examples}</ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_header():
     """
     ヘッダー（タイトルと説明）を表示する
     """
-    st.title(f"{DESIGN['title_icon']} {TEXTS['main_title']}")
+    logo_html = ""
+    assets_dir = get_assets_dir()
+    for logo_filename in ICONS["logo_candidates"]:
+        logo_path = os.path.join(assets_dir, logo_filename)
+        if os.path.exists(logo_path):
+            logo_base64 = _get_image_base64(logo_path)
+            if logo_base64:
+                logo_html = (
+                    f"<img src='data:image/png;base64,{logo_base64}' "
+                    f"alt='ファミリーシップ案内人' />"
+                )
+                st.session_state.logo_loaded = True
+                break
+    if not logo_html:
+        st.session_state.logo_loaded = False
+
     st.markdown(
-        f"<div style='margin-top: 0.75rem;'>{TEXTS['subtitle']}</div>",
+        f"""
+        <section class="app-hero">
+            <div class="hero-logo">{logo_html}</div>
+            <div class="hero-copy">
+                <div class="hero-kicker">ねんねママのファミリーシップ</div>
+                <div class="hero-title">{TEXTS['main_title']}</div>
+                <div class="hero-subtitle">{TEXTS['subtitle']}</div>
+            </div>
+        </section>
+        """,
         unsafe_allow_html=True
     )
-    render_logo()
 
 
 def render_chat_history():
@@ -198,6 +236,22 @@ def render_chat_history():
             else:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
+    else:
+        st.markdown(
+            f"""
+            <section class="welcome-panel">
+                <div class="welcome-kicker">AI concierge</div>
+                <h2>{TEXTS['welcome_title']}</h2>
+                <p>{TEXTS['welcome_body']}</p>
+                <div class="prompt-chips">
+                    <span>夜泣きに効く講座</span>
+                    <span>ライブ視聴URL</span>
+                    <span>離乳食の相談先</span>
+                </div>
+            </section>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_input_form():
@@ -218,8 +272,7 @@ def render_input_form():
         )
         # フッターを入力フォーム内に配置
         st.markdown(
-            f"<div style='text-align: center; color: rgba(128,128,128,0.5); "
-            f"padding: 0.25rem 0; font-size: 0.7rem; margin: 0;'>"
+            f"<div class='form-footer'>"
             f"{TEXTS['footer']}"
             f"</div>",
             unsafe_allow_html=True
@@ -237,76 +290,83 @@ def generate_css() -> str:
     return f"""
 <style>
 :root {{
-    --pink: #f9e8ef;
-    --mint: #e7f4f3;
+    --cream: {COLORS['cream']};
+    --sun: {COLORS['sun']};
+    --sun-deep: {COLORS['sun_deep']};
+    --aqua: {COLORS['aqua']};
+    --aqua-deep: {COLORS['aqua_deep']};
+    --coral: {COLORS['coral']};
     --navy: {COLORS['navy']};
     --white: {COLORS['white']};
-    --light-gray: #fdfbfc;
+    --soft-gray: {COLORS['soft_gray']};
+    --text-muted: {COLORS['text_muted']};
+    --shadow: 0 18px 48px rgba(92, 72, 34, 0.12);
+    --soft-shadow: 0 10px 26px rgba(92, 72, 34, 0.10);
 }}
 
-html, body, .stApp {{
+html, body, .stApp, .main {{
     width: 100%;
     max-width: 100vw;
-    background: {COLORS['beige']} !important;
+    background:
+        radial-gradient(circle at 18px 18px, rgba(245, 201, 84, 0.16) 0 2px, transparent 2.5px),
+        radial-gradient(circle at calc(100% - 34px) 118px, rgba(243, 168, 155, 0.12) 0 48px, transparent 49px),
+        linear-gradient(180deg, #fffdf3 0%, var(--cream) 48%, #fff4c6 100%) !important;
+    background-size: 28px 28px, auto, auto !important;
     overflow-x: hidden !important;
-    overflow-y: visible !important;
     min-height: 100vh;
 }}
 
-.main {{
-    background: {COLORS['beige']} !important;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
-    min-height: 100vh;
+.stApp::before {{
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, transparent 0 44%, rgba(255, 232, 159, 0.28) 44% 47%, transparent 47% 100%),
+        radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.65) 0 0.45rem, transparent 0.5rem),
+        radial-gradient(circle at 12% 82%, rgba(255, 255, 255, 0.52) 0 0.38rem, transparent 0.43rem);
+    opacity: 0.9;
 }}
-section.main > div {{
-    background: {COLORS['beige']} !important;
-}}
-/* 画面下の背景をベージュに統一（グレーを解消） */
+
 [data-testid="stAppViewContainer"],
 .stApp > div {{
-    background-color: {COLORS['beige']} !important;
+    background: transparent !important;
 }}
+
 .stApp {{
     color: var(--navy);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
 }}
+
 .stSidebar {{
-    background: {COLORS['beige']};
+    background: rgba(255, 253, 241, 0.96) !important;
+    border-right: 1px solid rgba(245, 201, 84, 0.35);
 }}
+
+.stSidebar [data-testid="stVerticalBlock"] {{
+    gap: 0.9rem;
+}}
+
 .block-container {{
-    background: {COLORS['beige']};
+    background: rgba(255, 253, 244, 0.82);
+    border: 1px solid rgba(245, 201, 84, 0.24);
     border-radius: {DESIGN['border_radius']}px;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 12px 38px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow);
     max-width: {DESIGN['container_max_width']}px;
     width: 100%;
-    margin-top: 1.5rem;
-    margin-bottom: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 2rem);
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding: 1.35rem 1.35rem 0;
+    min-height: calc(100vh - 2.5rem);
     overflow-x: hidden !important;
     box-sizing: border-box;
 }}
-/* タイトル部分のヘッダー被りを防止 */
-h1, div:has(> h1), div:has(> img[src*="assistant_icon"]) {{
-    margin-top: 1rem !important;
-    padding-top: 1rem !important;
-    margin-bottom: 0.75rem !important;
-}}
-/* タイトルの下の説明テキストの間隔を調整 */
-h1 + .stMarkdown,
-h1 ~ .stMarkdown:first-of-type {{
-    margin-top: 0.75rem !important;
-    padding-top: 0 !important;
-}}
-/* 横スクロールを防ぐための包括的な設定 */
+
 * {{
     box-sizing: border-box;
     max-width: 100%;
 }}
+
 section[data-testid="stMain"],
 section[data-testid="stMain"] > div,
 .stApp > div {{
@@ -314,349 +374,491 @@ section[data-testid="stMain"] > div,
     max-width: 100vw !important;
     overflow-x: hidden !important;
 }}
-/* Streamlitのデフォルトヘッダーとの間隔を確保 */
+
 section[data-testid="stMain"] > div:first-child {{
-    padding-top: 1.5rem !important;
-    margin-top: 0.5rem !important;
+    padding-top: 0.35rem !important;
 }}
-section[data-testid="stMain"] > div:first-child > div:first-child {{
-    padding-top: 0.2rem !important;
-    margin-top: 0.5rem !important;
+
+[data-testid="stHeader"] {{
+    background: transparent !important;
+    height: 0 !important;
 }}
-/* タイトルを含む最初のブロックに余白を追加 */
-div[data-testid="stVerticalBlock"]:first-of-type {{
-    padding-top: 0.1rem !important;
-    margin-top: 0.1rem !important;
+
+#MainMenu,
+footer,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"],
+[data-testid="stMainMenuButton"],
+[data-testid="stDeployButton"],
+[data-testid="stExpandSidebarButton"],
+[data-testid="stBaseButton-header"],
+[data-testid="stBaseButton-headerNoPadding"] {{
+    display: none !important;
 }}
-/* stVerticalBlockのpadding-topとmargin-topを0.1remに */
-div[data-testid="stVerticalBlock"] {{
-    padding-top: 0.1rem !important;
-    margin-top: 0.1rem !important;
+
+.app-hero {{
+    display: flex;
+    align-items: center;
+    gap: 0.82rem;
+    padding: 0.72rem 0.2rem 0.82rem;
 }}
-/* チャット履歴エリア（スクロール可能、最大限のスペースを確保） */
-div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
-    flex: 1;
-    overflow-y: visible;
-    padding-bottom: 0.5rem;
-    margin-bottom: 0;
-    min-height: 0;
+
+.hero-logo {{
+    width: 74px;
+    height: 74px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    background: linear-gradient(145deg, var(--white), #fff0ab);
+    border: 1px solid rgba(245, 201, 84, 0.42);
+    box-shadow: var(--soft-shadow);
 }}
-/* 入力フォームを下に固定（余白を最小化、背景をベージュに） */
-form[data-testid="stForm"] {{
-    position: sticky;
-    bottom: 0;
-    background: {COLORS['beige']} !important;
-    padding: 0.75rem;
-    border-radius: {DESIGN['button_border_radius']}px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-    z-index: 1000 !important;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,244,240,1);
+
+.hero-logo img {{
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
 }}
-/* 入力フォーム内のコンテナもベージュに */
-form[data-testid="stForm"] > div {{
-    background: {COLORS['beige']} !important;
+
+.hero-copy {{
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.14rem;
 }}
-/* テキストエリアの背景もベージュに */
-form[data-testid="stForm"] .stTextArea > div > div > textarea {{
-    background: {COLORS['white']} !important;
-    border: 1px solid rgba(45,42,50,0.15) !important;
+
+.hero-kicker,
+.welcome-kicker,
+.sidebar-kicker {{
+    color: #7c6a32;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin: 0 0 0.12rem;
+    text-transform: uppercase;
 }}
-/* 入力フォーム内の要素の余白を削減 */
-form[data-testid="stForm"] .stTextArea {{
-    margin-bottom: 0.5rem;
+
+.hero-title {{
+    color: var(--navy);
+    font-size: clamp(1.7rem, 4vw, 2.45rem);
+    line-height: 1.18;
+    margin: 0;
+    letter-spacing: 0;
+    font-weight: 800;
 }}
-form[data-testid="stForm"] .stButton {{
-    margin-top: 0;
+
+.hero-subtitle {{
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    line-height: 1.62;
+    margin: 0.12rem 0 0;
 }}
-/* フッターの余白を最小化 */
-div:has(> div:contains("©")) {{
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0.25rem !important;
-    margin-bottom: 0 !important;
+
+.welcome-panel {{
+    position: relative;
+    margin: 0.15rem 0 1rem;
+    padding: 1.2rem 1.1rem 1.08rem;
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 250, 225, 0.88)),
+        repeating-linear-gradient(135deg, rgba(245, 201, 84, 0.08) 0 8px, transparent 8px 16px);
+    border: 1px solid rgba(208, 161, 37, 0.26);
+    box-shadow: 0 14px 34px rgba(118, 88, 20, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    overflow: hidden;
 }}
-/* フッターテキストのスタイル */
-div:has(> div:contains("©")) div {{
-    margin: 0 !important;
-    padding: 0.25rem 0 !important;
+
+.welcome-panel::before {{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7px;
+    background: linear-gradient(90deg, var(--sun-deep), #ffdba6, var(--sun));
 }}
+
+.welcome-panel::after {{
+    content: "";
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(245, 201, 84, 0.28) 0 2px, transparent 2.5px);
+    background-size: 10px 10px;
+    opacity: 0.9;
+}}
+
+.welcome-panel h2 {{
+    color: var(--navy);
+    font-size: 1.2rem;
+    line-height: 1.35;
+    margin: 0;
+    letter-spacing: 0;
+}}
+
+.welcome-panel p {{
+    color: var(--text-muted);
+    font-size: 0.94rem;
+    line-height: 1.75;
+    margin: 0.55rem 0 0;
+}}
+
+.prompt-chips {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+}}
+
+.prompt-chips span {{
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.36rem 0.68rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(218, 174, 57, 0.24);
+    color: #72591a;
+    font-size: 0.84rem;
+    font-weight: 700;
+}}
+
 .stMarkdown a {{
     color: {COLORS['link']};
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
 }}
+
 .stMarkdown a:hover {{
     text-decoration: underline;
 }}
+
 .stChatMessage {{
-    border: 1px solid rgba(45,42,50,0.08);
-    background: {COLORS['beige']};
+    border: 1px solid rgba(245, 201, 84, 0.24);
+    background: rgba(255, 255, 255, 0.82);
     border-radius: {DESIGN['chat_border_radius']}px;
-    padding: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    padding: 0.9rem 1rem;
+    box-shadow: 0 8px 24px rgba(92, 72, 34, 0.08);
     overflow: visible;
-    margin-bottom: 1rem;
+    margin: 0.72rem 0;
 }}
+
 .stChatMessage[data-testid="stChatMessage-user"] {{
-    background: linear-gradient(135deg, rgba(249,232,239,0.55), rgba(231,244,243,0.45));
-    border-color: rgba(249,232,239,0.8);
+    background: linear-gradient(145deg, rgba(255, 245, 195, 0.86), rgba(255, 255, 255, 0.9));
+    border-color: rgba(245, 201, 84, 0.38);
 }}
+
 .stChatMessage[data-testid="stChatMessage-assistant"] {{
-    border-color: rgba(231,244,243,0.9);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 220, 0.9));
+    border-color: rgba(245, 201, 84, 0.32);
 }}
-/* チャットメッセージのアイコンとテキストの位置を統一 */
+
 .stChatMessage > div {{
     display: flex !important;
     align-items: flex-start !important;
-    gap: 12px !important;
+    gap: 0.75rem !important;
     width: 100% !important;
-    max-width: 100% !important;
     overflow-x: hidden !important;
 }}
-/* アイコン部分を上に揃える */
+
 .stChatMessage img,
 .stChatMessage > div > div:first-child,
 .stChatMessage > div > div:first-child img {{
     margin: 0 !important;
     padding: 0 !important;
-    vertical-align: top !important;
-    transform: translateY(0) !important;
     flex-shrink: 0 !important;
 }}
-/* テキスト部分をアイコンと同じ高さに調整 */
+
 .stChatMessage > div > div:last-child,
 .stChatMessage .stMarkdown {{
     margin-top: 0 !important;
     padding-top: 0 !important;
-    transform: translateY(0) !important;
     width: 100% !important;
-    max-width: 100% !important;
     overflow-x: hidden !important;
     word-wrap: break-word !important;
     word-break: break-word !important;
 }}
-/* テキストの最初の要素の余白を削除 */
+
 .stChatMessage .stMarkdown > p:first-child,
-.stChatMessage .stMarkdown > div:first-child,
 .stChatMessage .stMarkdown > *:first-child {{
     margin-top: 0 !important;
     padding-top: 0 !important;
-    line-height: 1.4 !important;
-    word-wrap: break-word !important;
-    word-break: break-word !important;
 }}
-.stButton>button {{
-    background: {COLORS['button_pink']} !important;
+
+.stChatMessage .stMarkdown p {{
+    color: #40382e;
+    line-height: 1.75;
+    margin-bottom: 0.45rem;
+}}
+
+[data-testid="stForm"] {{
+    position: sticky;
+    bottom: 0.85rem;
+    top: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    z-index: 50 !important;
+    margin: 1rem -0.35rem 0.2rem;
+    padding: 0.8rem;
+    border-radius: 14px;
+    background: rgba(255, 253, 241, 0.95) !important;
+    border: 1px solid rgba(245, 201, 84, 0.34);
+    box-shadow: 0 -10px 36px rgba(92, 72, 34, 0.12);
+    backdrop-filter: blur(14px);
+}}
+
+[data-testid="stForm"] > div {{
+    background: transparent !important;
+}}
+
+[data-testid="stForm"] .stTextArea {{
+    margin-bottom: 0.58rem;
+}}
+
+.stButton>button,
+[data-testid="stBaseButton-secondaryFormSubmit"] {{
+    min-height: 46px;
+    background: linear-gradient(180deg, {COLORS['button']}, {COLORS['button_hover']}) !important;
     color: {COLORS['navy']} !important;
     font-weight: 700;
-    border: 1px solid rgba(246, 201, 213, 0.3);
+    border: 1px solid rgba(159, 124, 24, 0.18);
     border-radius: {DESIGN['button_border_radius']}px;
-    padding: 0.65rem 1.05rem;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    padding: 0.72rem 1.05rem;
+    box-shadow: 0 8px 18px rgba(143, 106, 11, 0.16);
+    transition: transform 160ms ease, box-shadow 160ms ease;
 }}
-.stButton>button:hover {{
+
+.stButton>button:hover,
+[data-testid="stBaseButton-secondaryFormSubmit"]:hover {{
     background: {COLORS['button_hover']} !important;
     color: {COLORS['navy']} !important;
+    border-color: rgba(159, 124, 24, 0.28);
+    box-shadow: 0 10px 22px rgba(143, 106, 11, 0.20);
+    transform: translateY(-1px);
 }}
+
+.stButton>button:active,
+[data-testid="stBaseButton-secondaryFormSubmit"]:active {{
+    transform: translateY(0);
+}}
+
 .stTextArea > div > div > textarea, textarea {{
     color: #1f1f1f !important;
-    background: var(--white);
+    background: var(--white) !important;
     border-radius: {DESIGN['button_border_radius']}px;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-    border: 1px solid rgba(45,42,50,0.1);
+    box-shadow: inset 0 1px 2px rgba(92, 72, 34, 0.06);
+    border: 1px solid rgba(141, 119, 58, 0.24) !important;
+    line-height: 1.55 !important;
+    min-height: 76px !important;
 }}
+
+.stTextArea > div > div > textarea:focus {{
+    border-color: var(--sun-deep) !important;
+    box-shadow: 0 0 0 3px rgba(245, 201, 84, 0.18) !important;
+}}
+
 .stTextArea label, label {{
     color: var(--navy);
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 0 !important;
     padding-top: 0 !important;
     margin-bottom: 0.25rem !important;
 }}
-/* 質問入力欄のラベルの上の余白を削減 */
-form[data-testid="stForm"] .stTextArea label,
-form[data-testid="stForm"] label {{
+
+.form-footer {{
+    text-align: center;
+    color: rgba(111, 103, 87, 0.58);
+    padding: 0.24rem 0 0;
+    font-size: 0.72rem;
     margin-top: 0 !important;
-    padding-top: 0 !important;
-    margin-bottom: 0.25rem !important;
 }}
-.stTextInput>div>div>input {{
-    background: var(--white);
+
+.sidebar-card {{
+    margin: 0.75rem 0;
+    padding: 1rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(245, 201, 84, 0.32);
+    box-shadow: 0 8px 22px rgba(92, 72, 34, 0.08);
 }}
-/* レスポンシブ対応：モバイル表示時の調整 */
+
+.sidebar-card-accent {{
+    background: linear-gradient(145deg, rgba(255, 232, 159, 0.46), rgba(255, 255, 255, 0.72));
+}}
+
+.sidebar-card h3 {{
+    color: var(--navy);
+    font-size: 1rem;
+    line-height: 1.35;
+    margin: 0 0 0.55rem;
+    letter-spacing: 0;
+}}
+
+.sidebar-card ul {{
+    margin: 0;
+    padding-left: 1.05rem;
+}}
+
+.sidebar-card li {{
+    color: #51483a;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin: 0.25rem 0;
+}}
+
+.sidebar-note {{
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin: 0.7rem 0 0;
+}}
+
 @media screen and (max-width: {RESPONSIVE['mobile_breakpoint']}px) {{
     html, body, .stApp, .main {{
         width: 100% !important;
         max-width: 100vw !important;
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
-        height: auto !important;
         min-height: 100vh;
     }}
+
     .block-container {{
-        padding: {RESPONSIVE['mobile_padding']};
-        margin-top: 0.5rem;
-        margin-bottom: 0 !important;
-        border-radius: 12px;
-        padding-bottom: 0 !important;
+        max-width: 100vw;
         width: 100% !important;
-        max-width: 100vw !important;
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
-        box-sizing: border-box !important;
-        min-height: auto !important;
-        height: auto !important;
+        margin: 0;
+        padding: {RESPONSIVE['mobile_padding']};
+        padding-bottom: {RESPONSIVE['form_bottom_padding']}px !important;
+        border-width: 0;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
+        background: rgba(255, 253, 244, 0.58);
     }}
-    /* モバイルで1行の文字数を増やす */
+
+    section[data-testid="stMain"] > div:first-child {{
+        padding-top: 0 !important;
+    }}
+
+    .app-hero {{
+        gap: 0.68rem;
+        align-items: flex-start;
+        padding: 0.5rem 0 0.64rem;
+    }}
+
+    .hero-logo {{
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+    }}
+
+    .hero-logo img {{
+        width: 40px;
+        height: 40px;
+    }}
+
+    .hero-title {{
+        font-size: 1.62rem;
+    }}
+
+    .hero-subtitle {{
+        font-size: 0.9rem;
+        line-height: 1.55;
+        margin-top: 0.08rem;
+    }}
+
+    .hero-kicker,
+    .welcome-kicker,
+    .sidebar-kicker {{
+        font-size: 0.7rem;
+    }}
+
+    .welcome-panel {{
+        padding: 1.08rem 0.92rem 0.94rem;
+        border-radius: 14px;
+        margin-top: 0.08rem;
+    }}
+
+    .welcome-panel h2 {{
+        font-size: 1.08rem;
+    }}
+
+    .welcome-panel p,
     .stMarkdown,
     .stMarkdown p,
-    .stMarkdown div,
     .stChatMessage .stMarkdown,
     .stChatMessage .stMarkdown p {{
         font-size: {RESPONSIVE['mobile_font_size']} !important;
         line-height: {RESPONSIVE['mobile_line_height']} !important;
-        word-break: keep-all !important;
-        overflow-wrap: break-word !important;
+        overflow-wrap: anywhere !important;
     }}
-    /* チャットメッセージの幅を最大限に */
+
+    .prompt-chips {{
+        gap: 0.38rem;
+    }}
+
+    .prompt-chips span {{
+        min-height: 30px;
+        padding: 0.32rem 0.56rem;
+        font-size: 0.78rem;
+    }}
+
     .stChatMessage {{
         width: 100% !important;
-        max-width: 100% !important;
-        padding: 12px !important;
+        padding: 0.78rem !important;
+        border-radius: 14px;
+        margin: 0.58rem 0;
     }}
-    /* サイドバーの幅を調整 */
-    .stSidebar {{
-        padding: {RESPONSIVE['mobile_padding']} !important;
+
+    .stChatMessage > div {{
+        gap: 0.58rem !important;
     }}
-    /* 入力フォームをモバイルで確実に前面に、画面最下部に固定 */
-    form[data-testid="stForm"] {{
-        background: {COLORS['beige']} !important;
-        padding: 0.75rem !important;
-        padding-bottom: 0.5rem !important;
-        border-radius: 12px 12px 0 0 !important;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.12) !important;
-        z-index: 1000 !important;
+
+    [data-testid="stForm"] {{
         position: fixed !important;
+        top: auto !important;
         bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
         margin: 0 !important;
-        margin-bottom: 0 !important;
+        padding: 0.72rem 0.78rem calc(0.62rem + env(safe-area-inset-bottom)) !important;
+        border-radius: 14px 14px 0 0 !important;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        background: rgba(255, 253, 241, 0.98) !important;
+        box-shadow: 0 -12px 34px rgba(92, 72, 34, 0.16) !important;
     }}
-    /* モバイルで入力フォームの背景をベージュに */
-    form[data-testid="stForm"] > div,
-    form[data-testid="stForm"] .stTextArea,
-    form[data-testid="stForm"] .stTextArea > div,
-    form[data-testid="stForm"] .stTextArea > div > div {{
-        background: {COLORS['beige']} !important;
+
+    .stTextArea > div > div > textarea, textarea {{
+        min-height: 68px !important;
+        font-size: 16px !important;
     }}
-    form[data-testid="stForm"] .stTextArea > div > div > textarea {{
-        background: {COLORS['white']} !important;
+
+    .stButton>button,
+    [data-testid="stBaseButton-secondaryFormSubmit"] {{
+        min-height: 44px;
+        padding: 0.62rem 0.9rem;
     }}
-    /* フッターの余白を完全に削除（モバイル） */
-    form[data-testid="stForm"] div:has(> div:contains("©")),
-    form[data-testid="stForm"] div:has(> div:contains("©")) div {{
-        margin: 0 !important;
-        padding: 0.15rem 0 !important;
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+
+    .form-footer {{
+        padding-top: 0.2rem;
+        font-size: 0.66rem;
     }}
-    /* 入力フォームの下の余白を完全に削除 */
-    form[data-testid="stForm"] + *,
-    form[data-testid="stForm"] ~ * {{
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-        display: none !important;
+
+    [data-testid="stSidebar"][aria-expanded="true"] {{
+        min-width: min(88vw, 360px) !important;
+        max-width: min(88vw, 360px) !important;
     }}
-    /* 入力フォームの直下のすべての要素を非表示 */
-    form[data-testid="stForm"]::after {{
-        display: none !important;
-        content: none !important;
-    }}
-    /* チャット履歴エリアに下部の余白を追加（入力フォームの高さ分） */
-    div[data-testid="stVerticalBlock"]:has(.stChatMessage) {{
-        padding-bottom: {RESPONSIVE['form_bottom_padding']}px !important;
-        margin-bottom: 0 !important;
-        overflow-y: visible !important;
-    }}
-    /* メインコンテンツの下部余白を追加 */
-    .block-container {{
-        padding-bottom: {RESPONSIVE['form_bottom_padding']}px !important;
-        margin-bottom: 0 !important;
-        overflow-y: visible !important;
-    }}
-    /* 入力フォームの下に表示される可能性のある要素を非表示 */
-    section[data-testid="stMain"] > div:last-child,
-    section[data-testid="stMain"] > div:last-child > div:last-child,
-    section[data-testid="stMain"] > div:last-child > div:last-child > div {{
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }}
-    /* Streamlitのデフォルトの下部余白を削除 */
-    .main {{
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-    }}
-    /* 入力フォームの親要素の余白も削除 */
-    form[data-testid="stForm"] {{
-        margin-bottom: 0 !important;
-        padding-bottom: 0.5rem !important;
-    }}
-    /* 入力フォーム内の最後の要素の余白を削除 */
-    form[data-testid="stForm"] > div:last-child {{
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }}
-    /* 画面最下部の余白を完全に削除 */
-    section[data-testid="stMain"],
-    section[data-testid="stMain"] > div,
-    .element-container:last-child,
-    .stMarkdown:last-child {{
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }}
-    /* 入力フォームの下の白いスペースを削除 */
-    div[data-testid="stVerticalBlock"]:has(form[data-testid="stForm"]) ~ * {{
-        display: none !important;
-    }}
-    h1 {{
-        font-size: 1.75rem !important;
-    }}
-    /* モバイルでもサイドバーを表示可能にする */
+
     .stSidebar {{
-        display: block !important;
         z-index: 999 !important;
     }}
-    /* モバイルでサイドバーが開いた時のスタイル */
-    [data-testid="stSidebar"][aria-expanded="true"] {{
-        min-width: 85vw !important;
-        max-width: 85vw !important;
-    }}
-    /* ページ全体の下部余白を削除 */
-    body, html {{
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }}
-}}
-/* ロゴのスタイル調整（見切れ防止、画像の品質向上） */
-div[data-testid="stVerticalBlock"]:has(img[src*="concierge_logo"]),
-div:has(img[src*="concierge_logo"]) {{
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    text-align: center;
-}}
-div:has(img[src*="concierge_logo"]) img {{
-    max-width: {DESIGN['logo_width']}px;
-    width: {DESIGN['logo_width']}px;
-    height: auto;
-    object-fit: contain;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    image-rendering: auto;
 }}
 </style>
 """
@@ -776,10 +978,6 @@ def main():
     
     # CSSスタイルの適用
     st.markdown(generate_css(), unsafe_allow_html=True)
-    
-    # サイドバーの表示
-    with st.sidebar:
-        render_sidebar()
     
     # メインコンテンツの表示
     render_header()
