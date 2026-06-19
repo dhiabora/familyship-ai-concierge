@@ -90,7 +90,7 @@ RESPONSIVE = {
     "mobile_padding": "0.75rem 0.8rem",
     "mobile_font_size": "0.9rem",
     "mobile_line_height": "1.68",
-    "form_bottom_padding": 270,
+    "form_bottom_padding": 112,
 }
 
 
@@ -258,26 +258,11 @@ def render_input_form():
     """
     入力フォームを表示する
     """
-    with st.form(key="user_input_form", clear_on_submit=True):
-        user_input = st.text_area(
-            TEXTS["input_label"],
-            key="user_input",
-            height=80,
-            help=SIDEBAR["help_text"],
-            placeholder=TEXTS["input_placeholder"]
-        )
-        submit_button = st.form_submit_button(
-            TEXTS["submit_button"],
-            use_container_width=True
-        )
-        # フッターを入力フォーム内に配置
-        st.markdown(
-            f"<div class='form-footer'>"
-            f"{TEXTS['footer']}"
-            f"</div>",
-            unsafe_allow_html=True
-        )
-        return user_input, submit_button
+    user_input = st.chat_input(
+        TEXTS["input_placeholder"],
+        key="user_input_chat"
+    )
+    return user_input, bool(user_input)
 
 
 def generate_css() -> str:
@@ -563,7 +548,8 @@ footer,
     align-items: flex-start !important;
     gap: 0.62rem !important;
     width: 100% !important;
-    overflow-x: hidden !important;
+    min-width: 0 !important;
+    overflow: visible !important;
 }}
 
 .stChatMessage img,
@@ -579,7 +565,8 @@ footer,
     margin-top: 0 !important;
     padding-top: 0 !important;
     width: 100% !important;
-    overflow-x: hidden !important;
+    min-width: 0 !important;
+    overflow: visible !important;
     word-wrap: break-word !important;
     word-break: break-word !important;
 }}
@@ -713,6 +700,30 @@ footer,
     padding: 0.24rem 0 0;
     font-size: 0.72rem;
     margin-top: 0 !important;
+}}
+
+[data-testid="stChatInput"] {{
+    background: rgba(255, 253, 241, 0.96) !important;
+    border-top: 1px solid rgba(245, 201, 84, 0.32);
+    box-shadow: 0 -10px 28px rgba(92, 72, 34, 0.12);
+    padding: 0.55rem 0.85rem calc(0.55rem + env(safe-area-inset-bottom)) !important;
+}}
+
+[data-testid="stChatInput"] textarea {{
+    min-height: 42px !important;
+    max-height: 112px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(141, 119, 58, 0.24) !important;
+    background: #fff !important;
+    box-shadow: inset 0 1px 2px rgba(92, 72, 34, 0.06);
+    color: #2d2a32 !important;
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+}}
+
+[data-testid="stChatInput"] textarea:focus {{
+    border-color: var(--sun-deep) !important;
+    box-shadow: 0 0 0 3px rgba(245, 201, 84, 0.18) !important;
 }}
 
 .sidebar-card {{
@@ -923,6 +934,17 @@ footer,
 
     .form-footer {{
         display: none;
+    }}
+
+    [data-testid="stChatInput"] {{
+        padding: 0.42rem 0.68rem calc(0.42rem + env(safe-area-inset-bottom)) !important;
+        background: rgba(255, 253, 241, 0.98) !important;
+    }}
+
+    [data-testid="stChatInput"] textarea {{
+        min-height: 40px !important;
+        font-size: 16px !important;
+        line-height: 1.4 !important;
     }}
 
     [data-testid="stSidebar"][aria-expanded="true"] {{
